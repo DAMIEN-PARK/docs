@@ -1,48 +1,173 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "GrowFit Docs",
   "colors": {
     "primary": "#16A34A",
     "light": "#07C983",
     "dark": "#15803D"
   },
   "favicon": "/favicon.svg",
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "학습자",
         "groups": [
           {
-            "group": "Getting started",
+            "group": "시작하기",
             "pages": [
+              "student/index",
               "index",
-              "quickstart",
-              "development"
+              "getting-started/quickstart",
+              "getting-started/local-dev",
+              "getting-started/env",
+              "faq",
+              "troubleshooting",
+              "glossary"
             ]
           },
           {
-            "group": "Customization",
+            "group": "튜토리얼",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "tutorials/01-params",
+              "tutorials/02-rag",
+              "tutorials/03-rerank",
+              "tutorials/04-agent",
+              "tutorials/05-ab-compare"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "UI flows",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
+              "ui/practice",
+              "ui/knowledge-base"
             ]
           },
           {
-            "group": "AI tools",
+            "group": "LLM 실습",
             "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "practice/overview",
+              "practice/models",
+              "practice/parameters",
+              "practice/style-presets",
+              "practice/few-shot",
+              "practice/evaluation",
+              "practice/cost-latency"
+            ]
+          },
+          {
+            "group": "RAG",
+            "pages": [
+              "rag/overview",
+              "rag/ingestion",
+              "rag/chunking",
+              "rag/embeddings",
+              "rag/search",
+              "rag/threshold-topk",
+              "rag/rerank",
+              "rag/sources-citations"
+            ]
+          },
+          {
+            "group": "Agents",
+            "pages": [
+              "agents/overview",
+              "agents/system-prompt",
+              "agents/templates"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "강사",
+        "groups": [
+          {
+            "group": "시작하기",
+            "pages": [
+              "partner/index",
+              "getting-started/quickstart",
+              "getting-started/env",
+              "faq",
+              "troubleshooting",
+              "glossary"
+            ]
+          },
+          {
+            "group": "튜토리얼",
+            "pages": [
+              "tutorials/04-agent",
+              "tutorials/05-ab-compare"
+            ]
+          },
+          {
+            "group": "UI flows",
+            "pages": [
+              "ui/agents",
+              "ui/projects",
+              "ui/cost-analytics"
+            ]
+          },
+          {
+            "group": "LLM 실습",
+            "pages": [
+              "practice/overview",
+              "practice/agents",
+              "practice/evaluation",
+              "practice/cost-latency"
+            ]
+          },
+          {
+            "group": "RAG",
+            "pages": [
+              "rag/overview",
+              "rag/ingestion",
+              "rag/search",
+              "rag/rerank",
+              "rag/sources-citations"
+            ]
+          },
+          {
+            "group": "Agents",
+            "pages": [
+              "agents/overview",
+              "agents/system-prompt",
+              "agents/sharing",
+              "agents/forking",
+              "agents/versioning"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "운영자",
+        "groups": [
+          {
+            "group": "시작하기",
+            "pages": [
+              "ops/index",
+              "getting-started/env",
+              "troubleshooting",
+              "glossary"
+            ]
+          },
+          {
+            "group": "Operations",
+            "pages": [
+              "ops/roles-permissions",
+              "ops/class-llm-profiles",
+              "ops/budgets-guardrails",
+              "ops/monitoring-logs",
+              "ops/data-export"
+            ]
+          },
+          {
+            "group": "UI flows",
+            "pages": [
+              "ui/cost-analytics"
             ]
           }
         ]
@@ -51,72 +176,50 @@
         "tab": "API reference",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Overview",
             "pages": [
-              "api-reference/introduction"
+              "api/introduction",
+              "api/auth",
+              "api/errors"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "User",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "api/user/practice",
+              "api/user/documents",
+              "api/user/agents",
+              "api/user/projects"
+            ]
+          },
+          {
+            "group": "Partner",
+            "pages": [
+              "api/partner/classes",
+              "api/partner/students",
+              "api/partner/llm-profiles",
+              "api/partner/analytics"
+            ]
+          },
+          {
+            "group": "Supervisor",
+            "pages": [
+              "api/supervisor/settings",
+              "api/supervisor/usage",
+              "api/supervisor/model-catalog",
+              "api/supervisor/billing"
             ]
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    ]
   },
   "navbar": {
     "links": [
       {
         "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "href": "mailto:damien@bctone.kr"
       }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
-    }
-  },
-  "contextual": {
-    "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
-  },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
+    ]
   }
 }
