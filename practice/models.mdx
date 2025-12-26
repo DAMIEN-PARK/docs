@@ -1,0 +1,40 @@
+﻿---
+title: "모델 선택"
+description: "모델 선택/비교 기준"
+---
+## 이 문서에서 하는 것
+- 같은 질문을 여러 설정으로 실행해서 결과/비용/속도를 비교해.
+
+## 준비물
+- Practice 세션(새로 만들거나 기존 세션)
+- 모델 1개 선택
+
+## 조절 변수(핵심)
+- 모델: provider/model_name
+- 파라미터: temperature, top_p, max_tokens (및 response length preset을 쓰면 같이)
+- (선택) Agents: system prompt + few-shot 예시
+- (선택) RAG: top-k/threshold/rerank
+
+## 기록할 지표
+- 지연시간(latency) / TTFT
+- 토큰(prompt/completion/total)
+- 비용(추정치)
+- 품질(정확도/가독성/근거성)
+
+## 자주 터지는 실수
+- 변수를 한 번에 여러 개 바꿈(원인 분석 불가)
+- few-shot이 너무 김(비용/지연 급증)
+- temperature 과다(사실 QA에서 환각 위험)
+
+## 모델 선택 기준
+- 빠른 반복용: 속도/비용 좋은 모델
+- 최종 답변용: 품질 좋은 모델
+
+## 비교 체크리스트
+- 프롬프트/질문/RAG 설정을 동일하게 유지해.
+- randomness(temperature>0)면 2~3회 반복해서 편차도 봐.
+
+## 다음 문서
+- /practice/parameters
+- /practice/cost-latency
+

@@ -1,0 +1,43 @@
+﻿---
+title: "LLM 파라미터"
+description: "temperature/top_p/max_tokens 등 조절"
+---
+## 이 문서에서 하는 것
+- 같은 질문을 여러 설정으로 실행해서 결과/비용/속도를 비교해.
+
+## 준비물
+- Practice 세션(새로 만들거나 기존 세션)
+- 모델 1개 선택
+
+## 조절 변수(핵심)
+- 모델: provider/model_name
+- 파라미터: temperature, top_p, max_tokens (및 response length preset을 쓰면 같이)
+- (선택) Agents: system prompt + few-shot 예시
+- (선택) RAG: top-k/threshold/rerank
+
+## 기록할 지표
+- 지연시간(latency) / TTFT
+- 토큰(prompt/completion/total)
+- 비용(추정치)
+- 품질(정확도/가독성/근거성)
+
+## 자주 터지는 실수
+- 변수를 한 번에 여러 개 바꿈(원인 분석 불가)
+- few-shot이 너무 김(비용/지연 급증)
+- temperature 과다(사실 QA에서 환각 위험)
+
+## 파라미터 요약
+| 파라미터 | 의미 | 권장 범위(일반) | 메모 |
+|---|---|---:|---|
+| temperature | 다양성/랜덤성 | 0.0 ~ 1.0 | 높을수록 편차↑ |
+| top_p | 누적확률 샘플링 | 0.7 ~ 1.0 | 낮을수록 안정적 |
+| max_tokens | 출력 상한 | 상황별 | 너무 낮으면 끊김 |
+
+## 추천 실험
+1) temperature 0.2 vs 0.8 (나머지 고정)
+2) top_p 0.9 vs 1.0
+3) max_tokens 256 vs 1024 (끊김/비용 비교)
+
+## 다음 문서
+- /tutorials/01-params
+
