@@ -1,0 +1,40 @@
+﻿---
+title: "Agents 개요"
+description: "에이전트 개념과 전체 흐름"
+---
+## 이 문서에서 하는 것
+- 에이전트를 만들어 출력 형식/행동을 안정적으로 제어하고, 공유/포크로 교육 운영에 활용해.
+
+## agent 구성(권장)
+- system prompt: 역할/규칙/출력 형식
+- few-shot 예시(선택): 1~3개(짧고 형식 중심)
+- 기본 옵션(선택): 스타일 프리셋/파라미터 기본값
+
+## 비용/지연에 영향 주는 지점
+- system prompt 길이
+- few-shot 예시 길이
+- 세션에서 RAG/도구를 함께 켜면 prompt가 더 커짐
+
+## 자주 터지는 실수
+- 규칙이 너무 많아 충돌(모델이 제멋대로 우선순위 해석)
+- 금지/허용 기준이 모호함
+- 내용 위주의 few-shot(비싸고 과적합)
+
+## 라이프사이클(추천)
+1) agent 생성(system prompt 작성)
+2) Practice에서 질문 세트로 테스트
+3) 필요하면 few-shot 1~3개 추가
+4) 클래스에 공유(Partner)
+5) 학생은 포크해서 개인화
+
+## system prompt 권장 구조
+- 역할(Role)
+- 목표(Goal)
+- 제약(Do/Don't)
+- 출력 형식(Output format: 매우 구체적으로)
+
+## 다음 문서
+- /agents/system-prompt
+- /agents/sharing
+- /agents/forking
+
