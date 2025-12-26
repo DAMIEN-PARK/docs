@@ -1,0 +1,48 @@
+﻿---
+title: "RAG 개요"
+description: "Knowledge Base(RAG) 전체 흐름"
+---
+## 이 문서에서 하는 것
+- 검색(Retrieval) 설정을 바꾸면서 품질/지연/비용이 어떻게 달라지는지 확인해.
+
+## RAG 파이프라인(큰 흐름)
+1) 인제스천: 업로드 → 파싱 → 청킹
+2) 임베딩: 청크 → 벡터
+3) 검색: 질의 → 벡터검색 → 후보(top-k)
+4) (선택) 재랭킹: 후보 재정렬
+5) 생성: 답변 + 출처
+
+## 핵심 변수
+- chunk_size / chunk_overlap / max_chunks
+- embedding 모델(및 dimension)
+- top_k / threshold(유사도 임계값)
+- rerank on/off
+
+## 기록할 지표
+- retrieved_count / score 분포
+- 답변 근거성(정말 관련 청크를 가져왔나?)
+- 지연/토큰/비용(컨텍스트가 길어지면 prompt가 커짐)
+
+## 자주 터지는 실수
+- top-k 과다(노이즈/비용/지연 증가)
+- threshold 과다(필요한 청크를 못 가져옴)
+- overlap 과다(중복 컨텍스트로 토큰 낭비)
+
+## 추천 시작값(일반론)
+- chunk_size: 400~800
+- chunk_overlap: 50~150
+- top_k: 3~8
+- threshold: 낮게 시작 → 노이즈 줄 때까지 서서히 올리기
+- rerank: OFF로 시작 → 필요하면 ON
+
+## 추천 실험
+1) RAG OFF vs ON
+2) top_k 3 vs 10
+3) threshold 낮게 vs 높게
+4) rerank OFF vs ON
+
+## 다음 문서
+- /rag/ingestion
+- /rag/chunking
+- /rag/search
+

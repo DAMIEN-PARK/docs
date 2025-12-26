@@ -1,0 +1,42 @@
+﻿---
+title: "Threshold & Top-k"
+description: "top-k/threshold 조합 레시피"
+---
+## 이 문서에서 하는 것
+- 검색(Retrieval) 설정을 바꾸면서 품질/지연/비용이 어떻게 달라지는지 확인해.
+
+## RAG 파이프라인(큰 흐름)
+1) 인제스천: 업로드 → 파싱 → 청킹
+2) 임베딩: 청크 → 벡터
+3) 검색: 질의 → 벡터검색 → 후보(top-k)
+4) (선택) 재랭킹: 후보 재정렬
+5) 생성: 답변 + 출처
+
+## 핵심 변수
+- chunk_size / chunk_overlap / max_chunks
+- embedding 모델(및 dimension)
+- top_k / threshold(유사도 임계값)
+- rerank on/off
+
+## 기록할 지표
+- retrieved_count / score 분포
+- 답변 근거성(정말 관련 청크를 가져왔나?)
+- 지연/토큰/비용(컨텍스트가 길어지면 prompt가 커짐)
+
+## 자주 터지는 실수
+- top-k 과다(노이즈/비용/지연 증가)
+- threshold 과다(필요한 청크를 못 가져옴)
+- overlap 과다(중복 컨텍스트로 토큰 낭비)
+
+## 조합 레시피
+- 정밀도 우선: top_k 작게(3~5) + threshold 높게
+- 재현율 우선: top_k 크게(8~15) + threshold 낮게
+
+## 튜닝 순서(권장)
+1) top_k=5, threshold 낮게 시작
+2) threshold를 올려서 노이즈를 줄여
+3) 놓치는 답이 많으면 top_k를 조금 늘려
+
+## 다음 문서
+- /rag/rerank
+

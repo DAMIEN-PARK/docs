@@ -1,0 +1,48 @@
+﻿---
+title: "청킹(Chunking)"
+description: "chunk_size/overlap 전략과 트레이드오프"
+---
+## 이 문서에서 하는 것
+- 검색(Retrieval) 설정을 바꾸면서 품질/지연/비용이 어떻게 달라지는지 확인해.
+
+## RAG 파이프라인(큰 흐름)
+1) 인제스천: 업로드 → 파싱 → 청킹
+2) 임베딩: 청크 → 벡터
+3) 검색: 질의 → 벡터검색 → 후보(top-k)
+4) (선택) 재랭킹: 후보 재정렬
+5) 생성: 답변 + 출처
+
+## 핵심 변수
+- chunk_size / chunk_overlap / max_chunks
+- embedding 모델(및 dimension)
+- top_k / threshold(유사도 임계값)
+- rerank on/off
+
+## 기록할 지표
+- retrieved_count / score 분포
+- 답변 근거성(정말 관련 청크를 가져왔나?)
+- 지연/토큰/비용(컨텍스트가 길어지면 prompt가 커짐)
+
+## 자주 터지는 실수
+- top-k 과다(노이즈/비용/지연 증가)
+- threshold 과다(필요한 청크를 못 가져옴)
+- overlap 과다(중복 컨텍스트로 토큰 낭비)
+
+## 청킹 전략
+- recursive(문단/구조 기반) 권장
+- fixed-size는 구현은 쉽지만 의미 단위가 깨질 수 있음
+
+## 트레이드오프
+- 작은 청크: 정밀도↑ / 문맥연결↓
+- 큰 청크: 문맥연결↑ / 정밀도↓ + 토큰비용↑
+- overlap: 문맥연결↑ / 중복비용↑
+
+## 추천 실험
+1) chunk_size 300 vs 800
+2) overlap 0 vs 100
+3) max_chunks 상한으로 폭주 방지
+
+## 다음 문서
+- /rag/search
+- /rag/threshold-topk
+
