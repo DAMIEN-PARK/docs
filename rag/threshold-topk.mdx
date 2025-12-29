@@ -1,42 +1,28 @@
-﻿---
-title: "Threshold & Top-k"
-description: "top-k/threshold 조합 레시피"
 ---
+title: "Threshold & Top-k"
+description: "검색 필터링 조합을 빠르게 선택하는 법"
+---
+
 ## 이 문서에서 하는 것
-- 검색(Retrieval) 설정을 바꾸면서 품질/지연/비용이 어떻게 달라지는지 확인해.
+- top_k/threshold 조합을 상황별로 고르고, RAG 비교 카드에서 바로 시험하는 방법을 적어둔다.
 
-## RAG 파이프라인(큰 흐름)
-1) 인제스천: 업로드 → 파싱 → 청킹
-2) 임베딩: 청크 → 벡터
-3) 검색: 질의 → 벡터검색 → 후보(top-k)
-4) (선택) 재랭킹: 후보 재정렬
-5) 생성: 답변 + 출처
+## 기본 원칙
+- **top_k**는 후보 폭, **threshold**는 필터 강도다. 둘 중 하나만 크게 조정해도 컨텍스트 양이 크게 변한다.
+- threshold가 높아질수록 retrieved_count가 급격히 줄 수 있으니 실시간으로 출처 개수를 확인한다.
 
-## 핵심 변수
-- chunk_size / chunk_overlap / max_chunks
-- embedding 모델(및 dimension)
-- top_k / threshold(유사도 임계값)
-- rerank on/off
+## 추천 조합
+- **정밀도 우선(시험/평가 자료)**: top_k 3~5 + threshold 0.3~0.5. 재랭킹을 켜서 근거 품질을 확보.
+- **재현율 우선(검색·브레인스토밍)**: top_k 8~15 + threshold 0.1~0.2. 재랭킹은 필요 시만 켜고, 컨텍스트 길이를 모니터링.
+- **혼합형(FAQ/공지)**: top_k 5~8 + threshold 0.15~0.3. 질문 난이도에 따라 threshold를 조금씩 올려본다.
 
-## 기록할 지표
-- retrieved_count / score 분포
-- 답변 근거성(정말 관련 청크를 가져왔나?)
-- 지연/토큰/비용(컨텍스트가 길어지면 prompt가 커짐)
+## 튜닝 순서(현장용)
+1) top_k=5, threshold=0.15에서 시작.
+2) **노이즈가 많으면 threshold ↑**, **정답을 놓치면 top_k ↑**.
+3) latency/비용이 한계치를 넘으면 top_k를 되돌리거나 rerank를 끄고 다시 측정.
 
-## 자주 터지는 실수
-- top-k 과다(노이즈/비용/지연 증가)
-- threshold 과다(필요한 청크를 못 가져옴)
-- overlap 과다(중복 컨텍스트로 토큰 낭비)
-
-## 조합 레시피
-- 정밀도 우선: top_k 작게(3~5) + threshold 높게
-- 재현율 우선: top_k 크게(8~15) + threshold 낮게
-
-## 튜닝 순서(권장)
-1) top_k=5, threshold 낮게 시작
-2) threshold를 올려서 노이즈를 줄여
-3) 놓치는 답이 많으면 top_k를 조금 늘려
+## 비교 테스트 팁
+- 좌/우 카드에 서로 다른 조합을 넣고, 동일 질문을 실행해 **retrieved_count·출처·latency**를 표로 적어둔다.
+- 한 번에 숫자 하나만 바꿔야 원인을 설명할 수 있다. top_k와 threshold를 동시에 바꾸지 말 것.
 
 ## 다음 문서
-- /rag/rerank
-
+- /rag/rerank (재랭킹 on/off 판단 기준)

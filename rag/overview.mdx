@@ -1,48 +1,34 @@
-﻿---
+---
 title: "RAG 개요"
 description: "Knowledge Base(RAG) 전체 흐름"
 ---
+
 ## 이 문서에서 하는 것
-- 검색(Retrieval) 설정을 바꾸면서 품질/지연/비용이 어떻게 달라지는지 확인해.
+- Knowledge Base 화면에서 **업로드 → 파라미터 설정 → 비교 테스트** 흐름을 한눈에 정리하고, 어디서 무엇을 조정해야 하는지 짚어봐.
 
-## RAG 파이프라인(큰 흐름)
-1) 인제스천: 업로드 → 파싱 → 청킹
-2) 임베딩: 청크 → 벡터
-3) 검색: 질의 → 벡터검색 → 후보(top-k)
-4) (선택) 재랭킹: 후보 재정렬
-5) 생성: 답변 + 출처
+## 화면에서 보이는 RAG 파이프라인
+1) **인제스천**: 모드 카드(간편/고급)에서 업로드 방식 선택 → 파일/URL을 추가 → 인덱싱 상태 확인.
+2) **청킹·임베딩 설정**: 고급 설정에서 chunk_size/overlap, embedding 모델, dimension 입력.
+3) **검색·재랭킹**: RAG 비교 카드에서 top_k/threshold, rerank on/off를 좌·우로 다르게 설정.
+4) **응답 생성/출처 확인**: 테스트 프롬프트 실행 후, 응답과 근거 청크/점수를 나란히 비교.
 
-## 핵심 변수
-- chunk_size / chunk_overlap / max_chunks
-- embedding 모델(및 dimension)
-- top_k / threshold(유사도 임계값)
-- rerank on/off
+## 핵심 관찰 포인트
+- **품질**: 답변과 프리뷰에 표시되는 근거 섹션이 일치하는지, 출처 링크가 유효한지.
+- **지연/비용**: 좌·우 설정별 latency, 토큰 사용량(컨텍스트 길이), rerank 추가 비용 변화를 함께 본다.
+- **안정성**: 동일 파라미터에서 retrieved_count와 score 분포가 크게 흔들리지 않는지 체크.
 
-## 기록할 지표
-- retrieved_count / score 분포
-- 답변 근거성(정말 관련 청크를 가져왔나?)
-- 지연/토큰/비용(컨텍스트가 길어지면 prompt가 커짐)
+## 자주 터지는 실수 & 예방
+- 업로드 모드 혼동: 간편 업로드 기본값을 테스트한 뒤에만 고급 설정을 건드려라.
+- 파라미터 일괄 변경: top_k, threshold, rerank를 한 번에 바꾸면 원인 분석이 어렵다. 비교 카드로 **1개씩** 실험해.
+- 중복/불량 문서: 목록 패널에서 상태/파일 유형 필터를 적용하고, 프리뷰로 중복·깨진 파일을 먼저 제거한다.
 
-## 자주 터지는 실수
-- top-k 과다(노이즈/비용/지연 증가)
-- threshold 과다(필요한 청크를 못 가져옴)
-- overlap 과다(중복 컨텍스트로 토큰 낭비)
-
-## 추천 시작값(일반론)
-- chunk_size: 400~800
-- chunk_overlap: 50~150
-- top_k: 3~8
-- threshold: 낮게 시작 → 노이즈 줄 때까지 서서히 올리기
-- rerank: OFF로 시작 → 필요하면 ON
-
-## 추천 실험
-1) RAG OFF vs ON
-2) top_k 3 vs 10
-3) threshold 낮게 vs 높게
-4) rerank OFF vs ON
+## 첫 실험 추천
+1) **RAG OFF vs ON**: 좌측은 비활성, 우측은 기본값(top_k 5, threshold 낮음)으로 실행.
+2) **top_k 3 vs 10**: 정확도 vs 노이즈/비용 트레이드오프 체감.
+3) **rerank OFF vs ON**: latency 증가 폭 대비 근거 품질 향상 여부를 기록.
+4) **threshold 튜닝**: 낮은 값에서 시작해 노이즈가 줄 때까지 단계적으로 올린다.
 
 ## 다음 문서
-- /rag/ingestion
-- /rag/chunking
-- /rag/search
-
+- /rag/ingestion (업로드·상태 관리)
+- /rag/chunking (청킹 전략)
+- /rag/search (검색 파라미터·테스트 해석)
