@@ -35,10 +35,7 @@ function Get-PageMeta([string]$page) {
     # ---------- Getting started ----------
     "index"                      { $meta.title="GrowFit Docs"; $meta.desc="실습 중심 LLM 교육 플랫폼 GrowFit 문서" }
     "getting-started/local-dev"  { $meta.title="로컬에서 문서 실행"; $meta.desc="mint dev로 문서 로컬 실행" }
-    "getting-started/env"        { $meta.title="환경변수/설정"; $meta.desc="백엔드/문서 공통 설정" }
     "getting-started/quickstart" { $meta.title="Quickstart"; $meta.desc="Practice/RAG/Agents를 빠르게 맛보기" }
-    "faq"                        { $meta.title="FAQ"; $meta.desc="자주 묻는 질문" }
-    "troubleshooting"            { $meta.title="Troubleshooting"; $meta.desc="문제 해결 가이드" }
     "glossary"                   { $meta.title="용어집"; $meta.desc="핵심 용어 정리" }
 
     # ---------- Practice ----------

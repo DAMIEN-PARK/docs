@@ -21,8 +21,8 @@ GrowFit Docs는 아래 내용을 **빠르게 탐색하고, 바로 실습으로 �
 ## 빠른 시작 (3분)
 
 <Steps>
-  <Step title="환경변수/설정 확인">
-    백엔드와 문서가 공통으로 사용하는 설정값을 정리하고, 실행 환경을 맞춥니다.
+  <Step title="빠르게 따라하기">
+    필수 설정과 링크를 3분 요약 가이드로 훑고 바로 실습을 시작합니다.
   </Step>
 
   <Step title="API Reference 연결">
@@ -41,26 +41,6 @@ GrowFit Docs는 아래 내용을 **빠르게 탐색하고, 바로 실습으로 �
     FastAPI 스펙을 파일로 export하여 API Reference에 연결하는 방법을 안내합니다.
   </Card>
 </Columns>
-
----
-
-## 기타
-
-<Columns cols={3}>
-  <Card title="환경변수/설정" icon="gear" href="/getting-started/env">
-    백엔드/문서 공통 설정 값과 로컬 개발 시 주의사항을 정리합니다.
-  </Card>
-
-  <Card title="FAQ" icon="circle-question" href="/faq">
-    자주 묻는 질문과 바로 적용할 수 있는 답변을 모았습니다.
-  </Card>
-
-  <Card title="Troubleshooting" icon="life-ring" href="/troubleshooting">
-    실행/배포 시 자주 만나는 오류와 대응 방법을 정리했습니다.
-  </Card>
-</Columns>
-
----
 
 ## 역할별로 바로가기
 
@@ -130,68 +110,36 @@ GrowFit Docs는 아래 내용을 **빠르게 탐색하고, 바로 실습으로 �
 ### AI 실습
 
 <Columns cols={2}>
-  <Card title="파라미터 비교" icon="sliders" href="/tutorials/01-params">
-    동일 프롬프트로 <code>temperature</code>/<code>top_p</code>를 바꿔 응답 스타일 변화를 관찰합니다.
+  <Card title="AI 실습" icon="sliders" href="/tutorials/practice">
+    모델 파라미터와 프롬프트를 바꿔가며 결과 변화를 바로 비교하는 흐름을 따릅니다.
   </Card>
 
-  <Card title="A/B 비교 실습" icon="scale-balanced" href="/tutorials/05-ab-compare">
-    모델·프롬프트 실험을 프로젝트로 묶어 A/B 비교하는 흐름을 연습합니다.
-  </Card>
-</Columns>
-
-### 프로젝트
-
-<Columns cols={1}>
-  <Card title="실험 결과 관리" icon="folder-open" href="/tutorials/05-ab-compare">
-    프로젝트 단위로 실험을 정리하고, 비교 리포트를 만드는 법을 익힙니다.
+  <Card title="프로젝트 실습" icon="folder-open" href="/tutorials/project">
+    프로젝트 단위로 실험을 묶고 A/B 비교 리포트를 만드는 과정을 연습합니다.
   </Card>
 </Columns>
 
 ### 지식베이스
 
-<Columns cols={2}>
-  <Card title="RAG 적용" icon="magnifying-glass" href="/tutorials/02-rag">
-    RAG 적용 전/후를 비교하고 <code>top-k</code>/<code>threshold</code> 조합을 실험합니다.
-  </Card>
-
-  <Card title="Rerank on/off" icon="shuffle" href="/tutorials/03-rerank">
-    재랭킹이 정확도와 지연시간에 미치는 영향을 확인하고, 상황별 권장값을 정리합니다.
+<Columns cols={1}>
+  <Card title="지식베이스" icon="magnifying-glass" href="/tutorials/knowledge_base">
+    문서 업로드부터 청킹/임베딩/검색 설정 조정까지 RAG 적용 단계를 따라합니다.
   </Card>
 </Columns>
 
 ### 에이전트
 
-<Columns cols={2}>
-  <Card title="Agent 적용" icon="user-gear" href="/tutorials/04-agent">
-    <Badge color="gray" size="small">준비 중</Badge>
-    <br />
-    에이전트를 붙였을 때 시스템 프롬프트/예시가 결과를 어떻게 바꾸는지 실습합니다.
-  </Card>
-
-  <Card title="에이전트 실험 확장" icon="wand-magic-sparkles">
-    <Badge color="gray" size="small">준비 중</Badge>
-    <br />
-    다중 에이전트 시나리오와 공유/포크 흐름을 실습 튜토리얼로 추가할 예정입니다.
+<Columns cols={1}>
+  <Card title="에이전트" icon="user-gear" href="/tutorials/agent">
+    시스템 프롬프트와 few-shot 예시가 응답에 미치는 영향을 실습합니다.
   </Card>
 </Columns>
 
 ### 기록
 
 <Columns cols={1}>
-  <Card title="학습 기록 관리" icon="clock-rotate-left">
-    <Badge color="gray" size="small">준비 중</Badge>
-    <br />
-    실습 기록을 조회·비교하고, 재사용하는 방법을 튜토리얼로 제공할 예정입니다.
-  </Card>
-</Columns>
-
-### 설정
-
-<Columns cols={1}>
-  <Card title="설정 최적화" icon="gear">
-    <Badge color="gray" size="small">준비 중</Badge>
-    <br />
-    실습/운영 환경 설정을 최적화하는 튜토리얼을 준비 중입니다.
+  <Card title="기록" icon="clock-rotate-left" href="/tutorials/record">
+    실습 기록을 조회·비교하고 재사용하는 흐름을 따라갑니다.
   </Card>
 </Columns>
 
