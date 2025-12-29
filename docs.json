@@ -32,11 +32,11 @@
           {
             "group": "튜토리얼",
             "pages": [
-              "tutorials/01-params",
-              "tutorials/02-rag",
-              "tutorials/03-rerank",
-              "tutorials/04-agent",
-              "tutorials/05-ab-compare"
+              "tutorials/practice",
+              "tutorials/project",
+              "tutorials/knowledge_base",
+              "tutorials/agent",
+              "tutorials/record"
             ]
           },
           {
