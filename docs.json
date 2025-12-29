@@ -23,6 +23,9 @@
               "student/index",
               "index",
               "getting-started/quickstart",
+              "getting-started/env",
+              "faq",
+              "troubleshooting",
               "glossary"
             ]
           },
