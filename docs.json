@@ -90,17 +90,15 @@
             "pages": [
               "partner/index",
               "getting-started/quickstart",
-              "getting-started/env",
-              "faq",
-              "troubleshooting",
-              "glossary"
+              "getting-started/env"
             ]
           },
           {
-            "group": "튜토리얼",
+            "group": "수업 설계",
             "pages": [
-              "tutorials/04-agent",
-              "tutorials/05-ab-compare"
+              "partner/practice-assignments",
+              "partner/evaluation-rubric",
+              "practice/agents"
             ]
           },
           {
@@ -112,22 +110,9 @@
             ]
           },
           {
-            "group": "LLM 실습",
+            "group": "RAG 운영",
             "pages": [
-              "practice/overview",
-              "practice/agents",
-              "practice/evaluation",
-              "practice/cost-latency"
-            ]
-          },
-          {
-            "group": "RAG",
-            "pages": [
-              "rag/overview",
-              "rag/ingestion",
-              "rag/search",
-              "rag/rerank",
-              "rag/sources-citations"
+              "partner/rag-playbook"
             ]
           },
           {
