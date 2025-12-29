@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>비용 및 사용량 통계 - GrowFit AI 실습 플랫폼</title>
+
+    <!-- 공통 CSS -->
+    <link rel="stylesheet" href="../common/variables.css">
+    <link rel="stylesheet" href="../common/layout.css">
+    <link rel="stylesheet" href="../common/components.css">
+
+    <style>
+        /* ========== Cost Analytics 전용 스타일 ========== */
+
+        /* 페이지 헤더 */
+        .page-header {
+            margin-bottom: var(--space-6);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-header__left h1 {
+            font-size: var(--text-3xl);
+            font-weight: var(--font-bold);
+            color: var(--text-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .page-header__subtitle {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+        }
+
+        .page-header__actions {
+            display: flex;
+            gap: var(--space-3);
+        }
+
+        /* 통계 카드 그리드 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+        }
+
+        @media (max-width: 1366px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 비용 카드 */
+        .cost-card {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-5);
+            transition: all var(--transition-base);
+        }
+
+        .cost-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .cost-card--warning {
+            border-color: #f59e0b;
+            background: linear-gradient(to bottom, #fef3c710, var(--background));
+        }
+
+        .cost-card--danger {
+            border-color: #ef4444;
+            background: linear-gradient(to bottom, #fee2e210, var(--background));
+        }
+
+        .cost-card__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--space-3);
+        }
+
+        .cost-card__icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            background: var(--gray-100);
+        }
+
+        .cost-card__label {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-1);
+        }
+
+        .cost-card__value {
+            font-size: var(--text-3xl);
+            font-weight: var(--font-bold);
+            font-family: var(--font-mono);
+            color: var(--text-primary);
+            margin-bottom: var(--space-1);
+        }
+
+        .cost-card__subtext {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+        }
+
+        .cost-card__progress {
+            margin-top: var(--space-3);
+        }
+
+        .cost-card__alert {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            margin-top: var(--space-3);
+            padding: var(--space-2) var(--space-3);
+            background: #fee2e2;
+            border-radius: var(--radius-base);
+            font-size: var(--text-xs);
+            color: #991b1b;
+            font-weight: var(--font-medium);
+        }
+
+        /* 모델 비용 비교 */
+        .model-cost-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+        }
+
+        @media (max-width: 768px) {
+            .model-cost-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .model-cost-card {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-5);
+            transition: all var(--transition-base);
+        }
+
+        .model-cost-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .model-cost-card__header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            margin-bottom: var(--space-4);
+        }
+
+        .model-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .model-icon--gpt {
+            background: #10a37f20;
+            color: #10a37f;
+        }
+
+        .model-icon--claude {
+            background: #d9775720;
+            color: #d97757;
+        }
+
+        .model-icon--gemini {
+            background: #4285f420;
+            color: #4285f4;
+        }
+
+        .model-info h3 {
+            font-size: var(--text-lg);
+            font-weight: var(--font-bold);
+            margin-bottom: 2px;
+            color: var(--text-primary);
+        }
+
+        .model-info small {
+            font-size: var(--text-xs);
+            color: var(--text-secondary);
+        }
+
+        .model-cost-card__cost {
+            font-size: var(--text-2xl);
+            font-weight: var(--font-bold);
+            font-family: var(--font-mono);
+            color: var(--text-primary);
+            margin-bottom: var(--space-1);
+        }
+
+        .model-cost-card__percentage {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-3);
+        }
+
+        .model-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-3);
+            margin-top: var(--space-3);
+            padding-top: var(--space-3);
+            border-top: 1px solid var(--border);
+        }
+
+        .model-stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .model-stat__label {
+            font-size: var(--text-xs);
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+        }
+
+        .model-stat__value {
+            font-size: var(--text-base);
+            font-weight: var(--font-semibold);
+            font-family: var(--font-mono);
+            color: var(--text-primary);
+        }
+
+        /* 차트 컨테이너 */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-6);
+            margin-bottom: var(--space-6);
+        }
+
+        @media (max-width: 1366px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-container {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-5);
+        }
+
+        .chart-header {
+            margin-bottom: var(--space-4);
+            padding-bottom: var(--space-3);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .chart-title {
+            font-size: var(--text-lg);
+            font-weight: var(--font-bold);
+            color: var(--text-primary);
+        }
+
+        /* 시간대별 활동 차트 */
+        .activity-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 200px;
+            padding: var(--space-4) 0;
+        }
+
+        .activity-bar {
+            flex: 1;
+            background: var(--primary-500);
+            border-radius: var(--radius-base) var(--radius-base) 0 0;
+            position: relative;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            min-height: 20px;
+        }
+
+        .activity-bar:hover {
+            background: var(--primary-600);
+            transform: translateY(-2px);
+        }
+
+        .activity-bar__label {
+            position: absolute;
+            bottom: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: var(--text-xs);
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        /* 일별 비용 추세 테이블 */
+        .cost-trend-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .cost-trend-table th {
+            text-align: left;
+            padding: var(--space-3);
+            background: var(--gray-50);
+            font-size: var(--text-sm);
+            font-weight: var(--font-semibold);
+            color: var(--text-secondary);
+            border-bottom: 2px solid var(--border);
+        }
+
+        .cost-trend-table td {
+            padding: var(--space-3);
+            border-bottom: 1px solid var(--border);
+            font-size: var(--text-sm);
+        }
+
+        .cost-trend-table tr:hover {
+            background: var(--gray-50);
+        }
+
+        .trend-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: var(--radius-base);
+            font-size: var(--text-xs);
+            font-weight: var(--font-semibold);
+        }
+
+        .trend-badge--up {
+            background: #d1fae5;
+            color: var(--success);
+        }
+
+        .trend-badge--down {
+            background: #fee2e2;
+            color: var(--error);
+        }
+
+        .trend-badge--neutral {
+            background: var(--gray-100);
+            color: var(--text-secondary);
+        }
+
+        /* 상위 사용자 */
+        .top-users-grid {
+            display: grid;
+            gap: var(--space-3);
+        }
+
+        .top-user-card {
+            display: flex;
+            gap: var(--space-3);
+            align-items: center;
+            padding: var(--space-4);
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            transition: all var(--transition-base);
+        }
+
+        .top-user-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .top-user-rank {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--text-2xl);
+            font-weight: var(--font-bold);
+            flex-shrink: 0;
+        }
+
+        .top-user-rank--gold {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: white;
+        }
+
+        .top-user-rank--silver {
+            background: linear-gradient(135deg, #d1d5db, #9ca3af);
+            color: white;
+        }
+
+        .top-user-rank--bronze {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+        }
+
+        .top-user-info {
+            margin-bottom: var(--space-3);
+        }
+
+        .top-user-name {
+            font-size: var(--text-base);
+            font-weight: var(--font-semibold);
+            margin-bottom: 2px;
+        }
+
+        .top-user-email {
+            font-size: var(--text-xs);
+            color: var(--text-secondary);
+        }
+
+        .top-user-cost {
+            font-size: var(--text-xl);
+            font-weight: var(--font-bold);
+            font-family: var(--font-mono);
+            color: var(--text-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .top-user-details {
+            display: flex;
+            gap: var(--space-3);
+            font-size: var(--text-xs);
+            color: var(--text-secondary);
+        }
+
+        /* 필터 섹션 */
+        .filter-section {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            margin-bottom: var(--space-6);
+            display: flex;
+            gap: var(--space-3);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-1);
+        }
+
+        .filter-label {
+            font-size: var(--text-xs);
+            font-weight: var(--font-medium);
+            color: var(--text-secondary);
+        }
+
+        .filter-select {
+            padding: var(--space-2) var(--space-3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: var(--text-sm);
+            font-family: var(--font-sans);
+            color: var(--text-primary);
+            background: var(--background);
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .filter-select:hover {
+            border-color: var(--primary-300);
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px var(--primary-100);
+        }
+
+        /* 액션 버튼 영역 */
+        .action-section {
+            display: flex;
+            gap: var(--space-3);
+            justify-content: center;
+            padding: var(--space-6);
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-6);
+        }
+
+        /* 알림 박스 */
+        .info-box {
+            padding: var(--space-3);
+            background: var(--gray-50);
+            border-radius: var(--radius-md);
+            font-size: var(--text-sm);
+            margin-top: var(--space-4);
+        }
+
+        .info-box strong {
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header__left">
+                <button id="menuToggle" class="header__icon-button hidden-desktop">
+                    <span>☰</span>
+                </button>
+                <a href="dashboard.html" class="header__logo">
+                    <span class="header__logo-icon">🌱</span>
+                    <span>GrowFit Partner</span>
+                </a>
+            </div>
+
+            <div class="header__right">
+                <button id="notificationBtn" class="header__icon-button">
+                    <span>🔔</span>
+                    <span class="header__badge">3</span>
+                </button>
+
+                <div id="profileBtn" class="header__profile">
+                    <div class="header__avatar">박</div>
+                    <span class="hidden-mobile">박강사</span>
+                    <span class="hidden-mobile">▼</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="container">
+            <!-- Sidebar -->
+            <aside class="sidebar sidebar--open">
+                <div class="sidebar__user">
+                    <div class="sidebar__user-info">
+                        <div class="sidebar__user-avatar">박</div>
+                        <div class="sidebar__user-details">
+                            <div class="sidebar__user-name">박강사</div>
+                            <div class="sidebar__user-role">교육 강사</div>
+                        </div>
+                    </div>
+                </div>
+
+               <nav class="sidebar__nav">
+                    <ul class="sidebar__menu">
+                        <li class="sidebar__menu-item">
+                            <a href="dashboard.html" class="sidebar__menu-link">
+                                <span class="sidebar__menu-icon">📊</span>
+                                <span>대시보드</span>
+                            </a>
+                        </li>
+                        <li class="sidebar__menu-item">
+                            <a href="project-management.html" class="sidebar__menu-link">
+                                <span class="sidebar__menu-icon">📚</span>
+                                <span>강의 관리</span>
+                            </a>
+                        </li>
+                        <li class="sidebar__menu-item">
+                            <a href="student-management.html" class="sidebar__menu-link">
+                                <span class="sidebar__menu-icon">👥</span>
+                                <span>학생 관리</span>
+                            </a>
+                        </li>
+                        <li class="sidebar__menu-item">
+                            <a href="cost-analytics.html" class="sidebar__menu-link sidebar__menu-link--active">
+                                <span class="sidebar__menu-icon">💰</span>
+                                <span>비용 및 사용량 통계</span>
+                            </a>
+                        </li>
+                        <li class="sidebar__menu-item">
+                            <a href="settings.html" class="sidebar__menu-link">
+                                <span class="sidebar__menu-icon">⚙️</span>
+                                <span>설정</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main">
+                <div class="main__content">
+                    <!-- 페이지 헤더 -->
+                    <div class="page-header">
+                        <h1 class="page-title">💰 비용 및 사용량 통계</h1>
+                        <p class="page-subtitle" id="pageSubtitle">2025 AI 기초과정 - API 사용 비용 및 예산 관리</p>
+                    </div>
+
+                    <!-- 🆕 강의 선택 바 -->
+                    <div class="class-selector-bar" style="background: var(--background); border: 2px solid var(--primary-200); border-radius: var(--radius-lg); padding: var(--space-4); margin-bottom: var(--space-6); display: flex; align-items: center; gap: var(--space-4); box-shadow: var(--shadow-sm);">
+                        <div style="width: 48px; height: 48px; background: var(--primary-100); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;">
+                            📚
+                        </div>
+                        
+                        <div style="flex: 1; display: flex; align-items: center; gap: var(--space-3);">
+                            <label style="font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--text-secondary); white-space: nowrap;" for="classSelect">
+                                강의 선택:
+                            </label>
+                            
+                            <select id="classSelect" style="flex: 1; max-width: 500px; padding: var(--space-3) var(--space-4); border: 2px solid var(--border); border-radius: var(--radius-md); background: var(--background); font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--text-primary); cursor: pointer; transition: all var(--transition-base);" onchange="handleClassChange(this.value)">
+                                <optgroup label="진행 중인 강의">
+                                    <option value="class001" selected>2025 AI 기초과정 (3일, 20명)</option>
+                                    <option value="class002">2025 AI 심화과정 (5일, 15명)</option>
+                                    <option value="class003">프롬프트 엔지니어링 (16주, 30명)</option>
+                                </optgroup>
+                                <optgroup label="종료된 강의">
+                                    <option value="class004">2024  AI 기초과정 (종료)</option>
+                                    <option value="class005">2024 AI 심화과정 (종료)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <div style="display: flex; gap: var(--space-4); padding-left: var(--space-4); border-left: 2px solid var(--border);">
+                            <div style="display: flex; align-items: center; gap: var(--space-1); font-size: var(--text-sm); color: var(--text-secondary);">
+                                <span>👥</span>
+                                <span id="classStudentCount" style="font-weight: var(--font-bold); color: var(--text-primary);">20명</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--space-1); font-size: var(--text-sm); color: var(--text-secondary);">
+                                <span>📅</span>
+                                <span id="classDuration" style="font-weight: var(--font-bold); color: var(--text-primary);">3일차</span>
+                            </div>
+                       </div>
+                    </div>
+
+                    <!-- GrowFit 청구 금액 섹션 -->
+                    <div style="background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); border: 2px solid #d8b4fe; border-radius: var(--radius-lg); padding: var(--space-6); margin-bottom: var(--space-6);">
+                        <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">
+                            <div style="width: 48px; height: 48px; background: var(--primary-600); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                                🧾
+                            </div>
+                            <div>
+                                <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--text-primary); margin-bottom: 4px;">
+                                    GrowFit 이번 달 청구 내역
+                                </h2>
+                                <p style="font-size: var(--text-sm); color: var(--text-secondary);">
+                                    플랫폼 사용료(고정) + API 사용료(변동)가 포함된 총 청구 금액입니다
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- 청구 금액 카드 그리드 -->
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); margin-bottom: var(--space-4);">
+                            <!-- 플랫폼 사용료 (고정) -->
+                            <div class="cost-card" style="background: white;">
+                                <div class="cost-card__header">
+                                    <div>
+                                        <div class="cost-card__label">플랫폼 사용료 ✅</div>
+                                        <div class="cost-card__value" style="color: var(--primary-600);">$150.00</div>
+                                        <div class="cost-card__budget">20명 × 3일 × $2.50</div>
+                                    </div>
+                                </div>
+                                <div style="margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--border);">
+                                    <div style="font-size: var(--text-xs); color: var(--text-secondary);">
+                                        클래스 생성 시 확정
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- API 사용료 (변동) -->
+                            <div class="cost-card" style="background: white;">
+                                <div class="cost-card__header">
+                                    <div>
+                                        <div class="cost-card__label">API 사용료 📊</div>
+                                        <div class="cost-card__value" style="color: #3b82f6;">$172.48</div>
+                                        <div class="cost-card__budget">실제 사용량 기준</div>
+                                    </div>
+                                </div>
+                                <div style="margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--border);">
+                                    <div style="font-size: var(--text-xs); color: var(--text-secondary);">
+                                        5,200회 사용 · 평균 $0.033/회
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 총 청구액 -->
+                            <div class="cost-card" style="background: var(--primary-600); border: none;">
+                                <div class="cost-card__header">
+                                    <div>
+                                        <div class="cost-card__label" style="color: rgba(255,255,255,0.9);">총 청구액</div>
+                                        <div class="cost-card__value" style="color: white; font-size: 2.5rem;">$322.48</div>
+                                        <div class="cost-card__budget" style="color: rgba(255,255,255,0.8);">플랫폼 + API 합계</div>
+                                    </div>
+                                </div>
+                                <div style="margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid rgba(255,255,255,0.2);">
+                                    <div style="font-size: var(--text-xs); color: rgba(255,255,255,0.8);">
+                                        교육 종료 후 청구서 발행
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 비용 구성 상세 -->
+                        <div style="background: white; border-radius: var(--radius-lg); padding: var(--space-5);">
+                            <h3 style="font-size: var(--text-base); font-weight: var(--font-semibold); margin-bottom: var(--space-4); color: var(--text-primary);">
+                                📊 청구 금액 구성
+                            </h3>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); margin-bottom: var(--space-4);">
+                                <!-- 고정 비용 -->
+                                <div style="padding: var(--space-4); background: #f0fdf4; border: 1px solid #86efac; border-radius: var(--radius-md);">
+                                    <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3);">
+                                        <span style="font-size: 20px;">✅</span>
+                                        <span style="font-size: var(--text-sm); font-weight: var(--font-bold); color: #16a34a;">고정 비용 (확정)</span>
+                                    </div>
+                                    <div style="font-size: var(--text-2xl); font-weight: var(--font-bold); font-family: var(--font-mono); color: var(--text-primary); margin-bottom: var(--space-2);">
+                                        $150.00
+                                    </div>
+                                    <div style="font-size: var(--text-xs); color: var(--text-secondary); line-height: 1.5;">
+                                        • 학생 수: 20명<br>
+                                        • 교육 기간: 3일<br>
+                                        • 단가: $2.50/학생·일<br>
+                                        • 클래스 생성 시 확정
+                                    </div>
+                                </div>
+
+                                <!-- 변동 비용 -->
+                                <div style="padding: var(--space-4); background: #eff6ff; border: 1px solid #93c5fd; border-radius: var(--radius-md);">
+                                    <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3);">
+                                        <span style="font-size: 20px;">📊</span>
+                                        <span style="font-size: var(--text-sm); font-weight: var(--font-bold); color: #1e40af;">변동 비용 (실시간)</span>
+                                    </div>
+                                    <div style="font-size: var(--text-2xl); font-weight: var(--font-bold); font-family: var(--font-mono); color: var(--text-primary); margin-bottom: var(--space-2);">
+                                        $172.48
+                                    </div>
+                                    <div style="font-size: var(--text-xs); color: var(--text-secondary); line-height: 1.5;">
+                                        • 총 사용: 5,200회<br>
+                                        • 평균 단가: $0.033/회<br>
+                                        • GPT-4 + Claude + Gemini<br>
+                                        • 실제 사용량 기준
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 청구 안내 -->
+                            <div style="padding: var(--space-3); background: #f0f9ff; border-left: 4px solid #3b82f6; border-radius: var(--radius-md);">
+                                <div style="display: flex; align-items: start; gap: var(--space-2);">
+                                    <span style="font-size: 20px;">💡</span>
+                                    <div style="font-size: var(--text-sm); color: var(--text-secondary); line-height: 1.6;">
+                                        <strong style="color: var(--text-primary);">청구 안내:</strong><br>
+                                        • <strong>플랫폼 사용료</strong>: 학생 수 × 교육 일수 기준으로 클래스 생성 시 확정됩니다<br>
+                                        • <strong>API 사용료</strong>: 실제 AI 사용량(GPT-4, Claude, Gemini) 기준으로 책정됩니다<br>
+                                        • 일일 100회 제한으로 예산 초과를 방지합니다<br>
+                                        • 청구서는 교육 종료 후 3일 이내 발행됩니다
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API 사용 상세 분석 -->
+                    <h3 style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-4); color: var(--text-primary);">
+                        📊 API 사용 상세 분석
+                    </h3>
+                    <p style="font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: var(--space-4);">
+                        학생들의 실제 AI 사용 패턴과 비용을 확인하세요
+                    </p>
+
+                    <!-- 비용 개요 카드 -->
+                    <div class="stats-grid">
+                        <!-- 오늘 API 사용료 -->
+                        <div class="cost-card">
+                            <div class="cost-card__header">
+                                <div>
+                                    <div class="cost-card__label">오늘 API 사용료</div>
+                                    <div class="cost-card__value">$24.40</div>
+                                    <div class="cost-card__budget">일일 예산: $50.00</div>
+                                </div>
+                            </div>
+                            <div class="cost-card__progress">
+                                <div class="progress">
+                                    <div class="progress__bar" style="width: 49%"></div>
+                                </div>
+                                <small style="color: var(--text-secondary); margin-top: 4px; display: block;">
+                                    49% 사용 중 (약 850회)
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- 이번 주 API 사용료 -->
+                        <div class="cost-card">
+                            <div class="cost-card__header">
+                                <div>
+                                    <div class="cost-card__label">이번 주 API 사용료</div>
+                                    <div class="cost-card__value">$89.80</div>
+                                    <div class="cost-card__budget">주간 예산: $200.00</div>
+                                </div>
+                            </div>
+                            <div class="cost-card__progress">
+                                <div class="progress">
+                                    <div class="progress__bar" style="width: 45%"></div>
+                                </div>
+                                <small style="color: var(--text-secondary); margin-top: 4px; display: block;">
+                                    45% 사용 중
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- 총 API 사용료 -->
+                        <div class="cost-card cost-card--warning">
+                            <div class="cost-card__header">
+                                <div>
+                                    <div class="cost-card__label">전체 API 사용료</div>
+                                    <div class="cost-card__value">$172.48</div>
+                                    <div class="cost-card__budget">예산: $200.00</div>
+                                </div>
+                            </div>
+                            <div class="cost-card__progress">
+                                <div class="progress">
+                                    <div class="progress__bar progress__bar--warning" style="width: 86%"></div>
+                                </div>
+                                <small style="color: #92400e; margin-top: 4px; display: block;">
+                                    ⚠️ 86% 사용 중
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- 남은 예산 -->
+                        <div class="cost-card">
+                            <div class="cost-card__header">
+                                <div>
+                                    <div class="cost-card__label">남은 API 예산</div>
+                                    <div class="cost-card__value">$27.52</div>
+                                    <div class="cost-card__budget">13.8% 잔여</div>
+                                </div>
+                            </div>
+                            <div class="cost-card__alert">
+                                <span>💡</span>
+                                <span>일일 100회 제한으로 예산 관리 중</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 모델별 사용 분석 -->
+                    <h3 style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-4); margin-top: var(--space-6);">
+                        🤖 모델별 사용 분석
+                    </h3>
+                    <div class="model-cost-grid">
+                        <!-- GPT-4 -->
+                        <div class="model-cost-card">
+                            <div class="model-cost-card__header">
+                                <div class="model-icon model-icon--gpt">⚡</div>
+                                <div class="model-info">
+                                    <h3>GPT-4 Turbo</h3>
+                                    <small>OpenAI</small>
+                                </div>
+                            </div>
+                            <div class="model-cost-card__cost">$73.92</div>
+                            <div class="model-cost-card__percentage">총 API 사용료의 42.8%</div>
+                            <div class="progress">
+                                <div class="progress__bar" style="width: 42.8%; background: #10a37f;"></div>
+                            </div>
+                            <div class="model-stats">
+                                <div class="model-stat">
+                                    <span class="model-stat__label">호출 수</span>
+                                    <span class="model-stat__value">1,314</span>
+                                </div>
+                                <div class="model-stat">
+                                    <span class="model-stat__label">평균 사용료</span>
+                                    <span class="model-stat__value">$0.056</span>
+                                </div>
+                                <div class="model-stat">
+                                    <span class="model-stat__label">토큰</span>
+                                    <span class="model-stat__value">1.1M</span>
+                                </div>
+                                <div class="model-stat">
+                                    <span class="model-stat__label">사용자</span>
+                                    <span class="model-stat__value">16명</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Claude 3.5 -->
+                        <div class="model-cost-card">
+                            <div class="model-cost-card__header">
+                                <div class="model-icon model-icon--claude">🧠</div>
+                                <div class="model-info">
+                                    <h3>Claude 3.5 Sonnet</h3>
+                                    <small>Anthropic</small>
+                                </div>
+                            </div>
+                            <div class="model-cost-card__cost">$72.38</div>
+                            <div class="model-cost-card__percentage">총 API 사용료의 41.9%</div>
+                            <div class="progress">
+                                <div class="progress__bar" style="width: 41.9%; background: #d97757;"></div>
+                            </div>
+                            <div class="model-stats">
+                                <div class="model-stat">
+                                    <span class="model-stat__label">호출 수</span>
+                                    <span class="model-stat__value">1,455</span>
+                                </div>
+                                <div class="model-stat">
+                                    <span class="model-stat__label">평균 사용료</span>
+                                    <span class="model-stat__value">$0.050</span>
+                                </div>
+                                <div class="model-stat">
+                                    <span class="model-stat__label">토큰</span>
+                                    <span class="model-stat__value">1.2M</span>
+                                </div>
+                                <div class="model-stat">
+                                    <span class="model-stat__label">사용자</span>
+                                    <span class="model-stat__value">17명</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gemini Pro -->
+                        <div class="model-cost-card">
+                            <div class="model-cost-card__header">
+                                <div class="model-icon model-icon--gemini">✨</div>
+                                <div class="model-info">
+                                    <h3>Gemini Pro</h3>
+                                    <small>Google</small>
+                                </div>
+                            </div>
+                            <div class="model-cost-card__cost">$26.18</div>
+                            <div class="model-cost-card__percentage">총 API 사용료의 15.2%</div>
+                            <div class="progress">
+                                <div class="progress__bar" style="width: 15.2%; background: #4285f4;"></div>
+                            </div>
+                            <div class="model-stats">
+                                <div class="model-stat">
+                                    <span class="model-stat__label">호출 수</span>
+                                    <span class="model-stat__value">693</span>
+                                </div>
+                                <div class="model-stat">
+                                    <span class="model-stat__label">평균 사용료</span>
+                                    <span class="model-stat__value">$0.038</span>
+                                </div>
+                                <div class="model-stat">
+                                    <span class="model-stat__label">토큰</span>
+                                    <span class="model-stat__value">528K</span>
+                                </div>
+                                <div class="model-stat">
+                                    <span class="model-stat__label">사용자</span>
+                                    <span class="model-stat__value">12명</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Grid -->
+                    <div class="charts-grid">
+                        <!-- 시간대별 활동 -->
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <h3 class="chart-title">⏰ 시간대별 API 호출</h3>
+                            </div>
+                            <div class="activity-chart">
+                                <div class="activity-bar" style="height: 15%">
+                                    <div class="activity-bar__label">09:00</div>
+                                </div>
+                                <div class="activity-bar" style="height: 35%">
+                                    <div class="activity-bar__label">10:00</div>
+                                </div>
+                                <div class="activity-bar" style="height: 65%">
+                                    <div class="activity-bar__label">11:00</div>
+                                </div>
+                                <div class="activity-bar" style="height: 40%">
+                                    <div class="activity-bar__label">12:00</div>
+                                </div>
+                                <div class="activity-bar" style="height: 30%">
+                                    <div class="activity-bar__label">13:00</div>
+                                </div>
+                                <div class="activity-bar" style="height: 95%">
+                                    <div class="activity-bar__label">14:00</div>
+                                </div>
+                                <div class="activity-bar" style="height: 100%">
+                                    <div class="activity-bar__label">15:00</div>
+                                </div>
+                                <div class="activity-bar" style="height: 90%">
+                                    <div class="activity-bar__label">16:00</div>
+                                </div>
+                                <div class="activity-bar" style="height: 60%">
+                                    <div class="activity-bar__label">17:00</div>
+                                </div>
+                                <div class="activity-bar" style="height: 25%">
+                                    <div class="activity-bar__label">18:00</div>
+                                </div>
+                            </div>
+                            <div class="info-box">
+                                <strong>피크 시간:</strong> 오후 2-4시 (전체 요청의 42%)
+                            </div>
+                        </div>
+
+                        <!-- 일별 비용 추세 -->
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <h3 class="chart-title">📈 일별 비용 추세</h3>
+                            </div>
+                            <table class="cost-trend-table">
+                                <thead>
+                                    <tr>
+                                        <th>날짜</th>
+                                        <th>비용</th>
+                                        <th>변화</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>11월 15일 (Day 1)</td>
+                                        <td style="font-family: var(--font-mono); font-weight: 600;">$42.60</td>
+                                        <td><span class="trend-badge trend-badge--neutral">시작</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>11월 16일 (Day 2)</td>
+                                        <td style="font-family: var(--font-mono); font-weight: 600;">$89.80</td>
+                                        <td><span class="trend-badge trend-badge--up">↑ 111%</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>11월 17일 (Day 3)</td>
+                                        <td style="font-family: var(--font-mono); font-weight: 600;">$24.40</td>
+                                        <td><span class="trend-badge trend-badge--down">↓ 73%</span></td>
+                                    </tr>
+                                    <tr style="background: var(--gray-50); font-weight: 600;">
+                                        <td>총계</td>
+                                        <td style="font-family: var(--font-mono);">$156.80</td>
+                                        <td><span class="trend-badge trend-badge--neutral">평균 $52.27/일</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- 모델 선호도 변화 -->
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <h3 class="chart-title">🔄 모델 사용 비율 변화</h3>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-1); font-size: var(--text-sm);">
+                                        <span style="font-weight: 600;">Claude 3.5</span>
+                                        <span style="font-family: var(--font-mono);">42% (+5%)</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress__bar" style="width: 42%; background: #d97757"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-1); font-size: var(--text-sm);">
+                                        <span style="font-weight: 600;">GPT-4</span>
+                                        <span style="font-family: var(--font-mono);">38% (-3%)</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress__bar" style="width: 38%; background: #10a37f"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-1); font-size: var(--text-sm);">
+                                        <span style="font-weight: 600;">Gemini Pro</span>
+                                        <span style="font-family: var(--font-mono);">20% (-2%)</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress__bar" style="width: 20%; background: #4285f4"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="info-box" style="background: #e0e7ff;">
+                                <strong>트렌드:</strong> Claude 사용이 주간 150% 증가 중
+                            </div>
+                        </div>
+
+                        <!-- 비용 최적화 제안 -->
+                        <div class="chart-container" style="background: linear-gradient(to bottom, var(--primary-50), var(--background));">
+                            <div class="chart-header">
+                                <h3 class="chart-title">💡 비용 최적화 제안</h3>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+                                <div class="alert alert--info">
+                                    <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    <div class="alert__content">
+                                        <div class="alert__title">Gemini Pro 사용 증가 권장</div>
+                                        <div class="alert__message">동일 작업에서 Gemini Pro 사용 시 약 34% 비용 절감 가능</div>
+                                    </div>
+                                </div>
+                                <div class="alert alert--warning">
+                                    <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    <div class="alert__content">
+                                        <div class="alert__title">피크 시간 사용량 분산</div>
+                                        <div class="alert__message">오후 2-4시 집중 사용 → 오전 시간대로 일부 이동 권장</div>
+                                    </div>
+                                </div>
+                                <div class="alert alert--success">
+                                    <svg class="alert__icon" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    <div class="alert__content">
+                                        <div class="alert__title">예상 절감액</div>
+                                        <div class="alert__message">제안 사항 적용 시 월 $43.20 절감 가능 (약 27%)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 학생별 LLM 사용 현황 -->
+                    <div style="margin-top: var(--space-6); margin-bottom: var(--space-6);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4);">
+                            <div>
+                                <h3 style="font-size: var(--text-xl); font-weight: var(--font-bold); color: var(--text-primary);">
+                                    👥 학생별 LLM 사용 현황
+                                </h3>
+                                <p style="font-size: var(--text-sm); color: var(--text-secondary); margin-top: var(--space-1);">
+                                    각 학생의 모델 사용 패턴과 비용을 확인하세요
+                                </p>
+                            </div>
+                            <button class="btn btn--outline" onclick="window.open('student-management.html')">
+                                전체 보기 →
+                            </button>
+                        </div>
+
+                        <!-- 학생 사용 현황 테이블 -->
+                        <div style="background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: var(--gray-50); border-bottom: 2px solid var(--border);">
+                                        <th style="padding: var(--space-3); text-align: left; font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--text-secondary);">학생명</th>
+                                        <th style="padding: var(--space-3); text-align: center; font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--text-secondary);">총 사용</th>
+                                        <th style="padding: var(--space-3); text-align: center; font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--text-secondary);">GPT-4</th>
+                                        <th style="padding: var(--space-3); text-align: center; font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--text-secondary);">Claude</th>
+                                        <th style="padding: var(--space-3); text-align: center; font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--text-secondary);">Gemini</th>
+                                        <th style="padding: var(--space-3); text-align: center; font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--text-secondary);">선호 모델</th>
+                                        <th style="padding: var(--space-3); text-align: right; font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--text-secondary);">API 사용료</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background='transparent'">
+                                        <td style="padding: var(--space-3);">
+                                            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                                <div style="width: 32px; height: 32px; border-radius: var(--radius-full); background: #fbbf24; color: white; display: flex; align-items: center; justify-content: center; font-weight: var(--font-bold); font-size: var(--text-sm);">정</div>
+                                                <div>
+                                                    <div style="font-size: var(--text-sm); font-weight: var(--font-semibold);">정하늘</div>
+                                                    <div style="font-size: var(--text-xs); color: var(--text-secondary);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ff979e919a8a93bf9c90928f9e9186d19c9092">[email&#160;protected]</a></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <span style="font-family: var(--font-mono); font-weight: var(--font-bold); font-size: var(--text-base);">234회</span>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <div style="font-family: var(--font-mono); font-size: var(--text-sm); margin-bottom: 4px;">102회</div>
+                                            <div class="progress" style="height: 4px;">
+                                                <div class="progress__bar" style="width: 44%; background: #10a37f;"></div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <div style="font-family: var(--font-mono); font-size: var(--text-sm); margin-bottom: 4px;">87회</div>
+                                            <div class="progress" style="height: 4px;">
+                                                <div class="progress__bar" style="width: 37%; background: #d97757;"></div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <div style="font-family: var(--font-mono); font-size: var(--text-sm); margin-bottom: 4px;">45회</div>
+                                            <div class="progress" style="height: 4px;">
+                                                <div class="progress__bar" style="width: 19%; background: #4285f4;"></div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <span class="badge" style="background: #10a37f20; color: #10a37f;">GPT-4</span>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: right;">
+                                            <span style="font-family: var(--font-mono); font-weight: var(--font-bold); color: var(--text-primary);">$16.06</span>
+                                        </td>
+                                    </tr>
+
+                                    <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background='transparent'">
+                                        <td style="padding: var(--space-3);">
+                                            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                                <div style="width: 32px; height: 32px; border-radius: var(--radius-full); background: #d1d5db; color: white; display: flex; align-items: center; justify-content: center; font-weight: var(--font-bold); font-size: var(--text-sm);">김</div>
+                                                <div>
+                                                    <div style="font-size: var(--text-sm); font-weight: var(--font-semibold);">김민수</div>
+                                                    <div style="font-size: var(--text-xs); color: var(--text-secondary);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c0ada9aeb3b580a3afadb0a1aeb9eea3afad">[email&#160;protected]</a></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <span style="font-family: var(--font-mono); font-weight: var(--font-bold); font-size: var(--text-base);">198회</span>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <div style="font-family: var(--font-mono); font-size: var(--text-sm); margin-bottom: 4px;">56회</div>
+                                            <div class="progress" style="height: 4px;">
+                                                <div class="progress__bar" style="width: 28%; background: #10a37f;"></div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <div style="font-family: var(--font-mono); font-size: var(--text-sm); margin-bottom: 4px;">108회</div>
+                                            <div class="progress" style="height: 4px;">
+                                                <div class="progress__bar" style="width: 55%; background: #d97757;"></div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <div style="font-family: var(--font-mono); font-size: var(--text-sm); margin-bottom: 4px;">34회</div>
+                                            <div class="progress" style="height: 4px;">
+                                                <div class="progress__bar" style="width: 17%; background: #4285f4;"></div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <span class="badge" style="background: #d9775720; color: #d97757;">Claude</span>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: right;">
+                                            <span style="font-family: var(--font-mono); font-weight: var(--font-bold); color: var(--text-primary);">$13.64</span>
+                                        </td>
+                                    </tr>
+
+                                    <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background='transparent'">
+                                        <td style="padding: var(--space-3);">
+                                            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                                <div style="width: 32px; height: 32px; border-radius: var(--radius-full); background: #f97316; color: white; display: flex; align-items: center; justify-content: center; font-weight: var(--font-bold); font-size: var(--text-sm);">이</div>
+                                                <div>
+                                                    <div style="font-size: var(--text-sm); font-weight: var(--font-semibold);">이지은</div>
+                                                    <div style="font-size: var(--text-xs); color: var(--text-secondary);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="573d3e3222391734383a2736392e7934383a">[email&#160;protected]</a></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <span style="font-family: var(--font-mono); font-weight: var(--font-bold); font-size: var(--text-base);">176회</span>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <div style="font-family: var(--font-mono); font-size: var(--text-sm); margin-bottom: 4px;">78회</div>
+                                            <div class="progress" style="height: 4px;">
+                                                <div class="progress__bar" style="width: 44%; background: #10a37f;"></div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <div style="font-family: var(--font-mono); font-size: var(--text-sm); margin-bottom: 4px;">62회</div>
+                                            <div class="progress" style="height: 4px;">
+                                                <div class="progress__bar" style="width: 35%; background: #d97757;"></div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <div style="font-family: var(--font-mono); font-size: var(--text-sm); margin-bottom: 4px;">36회</div>
+                                            <div class="progress" style="height: 4px;">
+                                                <div class="progress__bar" style="width: 21%; background: #4285f4;"></div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <span class="badge" style="background: #10a37f20; color: #10a37f;">GPT-4</span>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: right;">
+                                            <span style="font-family: var(--font-mono); font-weight: var(--font-bold); color: var(--text-primary);">$11.88</span>
+                                        </td>
+                                    </tr>
+
+                                    <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background='transparent'">
+                                        <td style="padding: var(--space-3);">
+                                            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                                <div style="width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--gray-400); color: white; display: flex; align-items: center; justify-content: center; font-weight: var(--font-bold); font-size: var(--text-sm);">박</div>
+                                                <div>
+                                                    <div style="font-size: var(--text-sm); font-weight: var(--font-semibold);">박서준</div>
+                                                    <div style="font-size: var(--text-xs); color: var(--text-secondary);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2f5c4a40455a416f4c40425f4e4156014c4042">[email&#160;protected]</a></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <span style="font-family: var(--font-mono); font-weight: var(--font-bold); font-size: var(--text-base);">152회</span>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <div style="font-family: var(--font-mono); font-size: var(--text-sm); margin-bottom: 4px;">48회</div>
+                                            <div class="progress" style="height: 4px;">
+                                                <div class="progress__bar" style="width: 32%; background: #10a37f;"></div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <div style="font-family: var(--font-mono); font-size: var(--text-sm); margin-bottom: 4px;">76회</div>
+                                            <div class="progress" style="height: 4px;">
+                                                <div class="progress__bar" style="width: 50%; background: #d97757;"></div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <div style="font-family: var(--font-mono); font-size: var(--text-sm); margin-bottom: 4px;">28회</div>
+                                            <div class="progress" style="height: 4px;">
+                                                <div class="progress__bar" style="width: 18%; background: #4285f4;"></div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <span class="badge" style="background: #d9775720; color: #d97757;">Claude</span>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: right;">
+                                            <span style="font-family: var(--font-mono); font-weight: var(--font-bold); color: var(--text-primary);">$10.12</span>
+                                        </td>
+                                    </tr>
+
+                                    <tr style="transition: background 0.2s;" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background='transparent'">
+                                        <td style="padding: var(--space-3);">
+                                            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                                <div style="width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--gray-400); color: white; display: flex; align-items: center; justify-content: center; font-weight: var(--font-bold); font-size: var(--text-sm);">최</div>
+                                                <div>
+                                                    <div style="font-size: var(--text-sm); font-weight: var(--font-semibold);">최윤아</div>
+                                                    <div style="font-size: var(--text-xs); color: var(--text-secondary);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6b121e050a2b0804061b0a051245080406">[email&#160;protected]</a></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <span style="font-family: var(--font-mono); font-weight: var(--font-bold); font-size: var(--text-base);">143회</span>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <div style="font-family: var(--font-mono); font-size: var(--text-sm); margin-bottom: 4px;">42회</div>
+                                            <div class="progress" style="height: 4px;">
+                                                <div class="progress__bar" style="width: 29%; background: #10a37f;"></div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <div style="font-family: var(--font-mono); font-size: var(--text-sm); margin-bottom: 4px;">38회</div>
+                                            <div class="progress" style="height: 4px;">
+                                                <div class="progress__bar" style="width: 27%; background: #d97757;"></div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <div style="font-family: var(--font-mono); font-size: var(--text-sm); margin-bottom: 4px;">63회</div>
+                                            <div class="progress" style="height: 4px;">
+                                                <div class="progress__bar" style="width: 44%; background: #4285f4;"></div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: center;">
+                                            <span class="badge" style="background: #4285f420; color: #4285f4;">Gemini</span>
+                                        </td>
+                                        <td style="padding: var(--space-3); text-align: right;">
+                                            <span style="font-family: var(--font-mono); font-weight: var(--font-bold); color: var(--text-primary);">$9.46</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- 통계 요약 -->
+                        <div style="margin-top: var(--space-4); display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3);">
+                            <div style="padding: var(--space-3); background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-md); text-align: center;">
+                                <div style="font-size: var(--text-xs); color: var(--text-secondary); margin-bottom: var(--space-1);">평균 사용</div>
+                                <div style="font-size: var(--text-xl); font-weight: var(--font-bold); font-family: var(--font-mono);">173회</div>
+                            </div>
+                            <div style="padding: var(--space-3); background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-md); text-align: center;">
+                                <div style="font-size: var(--text-xs); color: var(--text-secondary); margin-bottom: var(--space-1);">최다 사용</div>
+                                <div style="font-size: var(--text-xl); font-weight: var(--font-bold); font-family: var(--font-mono);">234회</div>
+                            </div>
+                            <div style="padding: var(--space-3); background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-md); text-align: center;">
+                                <div style="font-size: var(--text-xs); color: var(--text-secondary); margin-bottom: var(--space-1);">최소 사용</div>
+                                <div style="font-size: var(--text-xl); font-weight: var(--font-bold); font-family: var(--font-mono);">85회</div>
+                            </div>
+                            <div style="padding: var(--space-3); background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-md); text-align: center;">
+                                <div style="font-size: var(--text-xs); color: var(--text-secondary); margin-bottom: var(--space-1);">활성 학생</div>
+                                <div style="font-size: var(--text-xl); font-weight: var(--font-bold); font-family: var(--font-mono);">18/20</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 액션 버튼 -->
+                    <div style="display: flex; gap: var(--space-3); justify-content: center; padding: var(--space-6); background: var(--gray-50); border-radius: var(--radius-lg);">
+                        <button class="btn btn--outline" onclick="exportCostReport()">
+                            📥 비용 리포트 다운로드
+                        </button>
+                        <button class="btn btn--outline" onclick="window.open('budget-settings.html')">
+                            ⚙️ 예산 설정
+                        </button>
+                        <button class="btn btn--primary" onclick="window.open('student-management.html')">
+                            👥 학생별 상세 보기
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 공통 스크립트 -->
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="../common/layout.js"></script>
+    <script src="../common/utils.js"></script>
+
+    <!-- 페이지 전용 스크립트 -->
+    <script>
+        // 강의별 데이터
+        const classDataMap = {
+            'class001': {
+                name: '2025 AI 기초과정',
+                subtitle: '2025 AI 기초과정 - API 사용 비용 및 예산 관리',
+                students: 20,
+                duration: '3일',
+                currentDay: 3,
+                budget: 500,
+                platformFee: 150.00,
+                apiCost: 172.48,
+                totalCost: 322.48,
+                remainingBudget: 177.52,
+                todayApiCost: 24.40,
+                weekApiCost: 89.80,
+                totalUsage: 5200,
+                avgCostPerUse: 0.033
+            },
+            'class002': {
+                name: '2025 AI 심화과정',
+                subtitle: '2025 AI 심화과정 - API 사용 비용 및 예산 관리',
+                students: 15,
+                duration: '5일',
+                currentDay: 5,
+                budget: 800,
+                platformFee: 187.50,
+                apiCost: 245.80,
+                totalCost: 433.30,
+                remainingBudget: 366.70,
+                todayApiCost: 32.50,
+                weekApiCost: 156.30,
+                totalUsage: 7800,
+                avgCostPerUse: 0.031
+            },
+            'class003': {
+                name: '프롬프트 엔지니어링',
+                subtitle: '프롬프트 엔지니어링 - API 사용 비용 및 예산 관리',
+                students: 30,
+                duration: '16주',
+                currentDay: 56,
+                budget: 1200,
+                platformFee: 672.00,
+                apiCost: 428.60,
+                totalCost: 1100.60,
+                remainingBudget: 99.40,
+                todayApiCost: 18.90,
+                weekApiCost: 124.50,
+                totalUsage: 12400,
+                avgCostPerUse: 0.034
+            },
+            'class004': {
+                name: '2024  AI 기초과정',
+                subtitle: '2024 AI 기초과정 - 종료된 강의 통계',
+                students: 25,
+                duration: '종료',
+                currentDay: 0,
+                budget: 650,
+                platformFee: 312.50,
+                apiCost: 298.40,
+                totalCost: 610.90,
+                remainingBudget: 39.10,
+                todayApiCost: 0,
+                weekApiCost: 0,
+                totalUsage: 9200,
+                avgCostPerUse: 0.032
+            },
+            'class005': {
+                name: '2024  AI 심화과정',
+                subtitle: '2024 AI 심화과정 - 종료된 강의 통계',
+                students: 18,
+                duration: '종료',
+                currentDay: 0,
+                budget: 420,
+                platformFee: 135.00,
+                apiCost: 256.80,
+                totalCost: 391.80,
+                remainingBudget: 28.20,
+                todayApiCost: 0,
+                weekApiCost: 0,
+                totalUsage: 6800,
+                avgCostPerUse: 0.037
+            }
+        };
+
+        // 강의 변경 핸들러
+        function handleClassChange(classId) {
+            const data = classDataMap[classId];
+            if (!data) return;
+
+            // 상단 정보 업데이트
+            document.getElementById('pageSubtitle').textContent = data.subtitle;
+            document.getElementById('classStudentCount').textContent = `${data.students}명`;
+            document.getElementById('classDuration').textContent = data.currentDay > 0 ? `${data.currentDay}일차` : data.duration;
+            document.getElementById('classBudget').textContent = `$${data.budget}`;
+
+            // 플랫폼 사용료 업데이트
+            const platformCostValue = document.querySelector('.cost-card__value[style*="color: var(--primary-600)"]');
+            if (platformCostValue) {
+                platformCostValue.textContent = `$${data.platformFee.toFixed(2)}`;
+            }
+
+            // API 사용료 업데이트
+            const apiCostElements = document.querySelectorAll('.cost-card__value[style*="color: #3b82f6"]');
+            if (apiCostElements[0]) {
+                apiCostElements[0].textContent = `$${data.apiCost.toFixed(2)}`;
+            }
+
+            // 총 청구액 업데이트
+            const totalCostValue = document.querySelector('.cost-card__value[style*="color: white"]');
+            if (totalCostValue) {
+                totalCostValue.textContent = `$${data.totalCost.toFixed(2)}`;
+            }
+
+            // 상세 API 사용료 카드 업데이트
+            const apiCostCards = document.querySelectorAll('.cost-card .cost-card__value');
+            if (apiCostCards.length >= 4) {
+                // 오늘 API 사용료
+                apiCostCards[3].textContent = `$${data.todayApiCost.toFixed(2)}`;
+                // 이번 주 API 사용료
+                apiCostCards[4].textContent = `$${data.weekApiCost.toFixed(2)}`;
+                // 전체 API 사용료
+                apiCostCards[5].textContent = `$${data.apiCost.toFixed(2)}`;
+                // 남은 예산
+                apiCostCards[6].textContent = `$${data.remainingBudget.toFixed(2)}`;
+            }
+
+            console.log(`강의 변경: ${data.name}`);
+            
+            // 실제로는 여기서 API를 호출하여 상세 통계를 가져옴
+            // loadClassStats(classId);
+        }
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            // URL 파라미터에서 강의 ID 확인
+            const urlParams = new URLSearchParams(window.location.search);
+            const classId = urlParams.get('classId');
+            
+            if (classId && classDataMap[classId]) {
+                document.getElementById('classSelect').value = classId;
+                handleClassChange(classId);
+            }
+        });
+
+        // 비용 리포트 다운로드
+        function exportCostReport() {
+            const classId = document.getElementById('classSelect').value;
+            const data = classDataMap[classId];
+            alert(`${data.name} 비용 리포트를 다운로드합니다.`);
+            // 실제로는 CSV/PDF 생성 로직
+        }
+    </script>
+
+</body>
+</html>

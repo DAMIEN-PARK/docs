@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 학습 기록 - GrowFit</title>
+    <style>
+/* ========== CSS Variables ========== */
+:root {
+    --primary-50: #faf5ff;
+    --primary-100: #f3e8ff;
+    --primary-200: #e9d5ff;
+    --primary-300: #d8b4fe;
+    --primary-400: #c084fc;
+    --primary-500: #a855f7;
+    --primary-600: #9333ea;
+    --primary-700: #7e22ce;
+    --primary-800: #6b21a8;
+    --primary-900: #581c87;
+
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --gray-900: #0f172a;
+
+    --success: #10b981;
+    --success-light: #d1fae5;
+    --warning: #f59e0b;
+    --warning-light: #fef3c7;
+    --error: #ef4444;
+    --error-light: #fee2e2;
+    --info: #3b82f6;
+    --info-light: #dbeafe;
+
+    --background: #ffffff;
+    --surface: #f8fafc;
+    --border: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-tertiary: #94a3b8;
+
+    --gpt-color: #10a37f;
+    --gpt-bg: #ecfdf5;
+    --claude-color: #d97757;
+    --claude-bg: #fff7ed;
+    --gemini-color: #4285f4;
+    --gemini-bg: #eff6ff;
+    --exaone-color: #a50034;
+    --exaone-bg: #fdf2f8;
+
+    --sidebar-width: 260px;
+    --header-height: 56px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", sans-serif;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font-sans); background: var(--background); color: var(--text-primary); height: 100vh; overflow: hidden; }
+
+.icon { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; flex-shrink: 0; }
+.icon--sm { width: 16px; height: 16px; }
+.icon--lg { width: 24px; height: 24px; }
+
+.app { display: flex; height: 100vh; }
+
+/* ========== Sidebar ========== */
+.sidebar { width: var(--sidebar-width); background: var(--background); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+.sidebar__header { padding: 16px; border-bottom: 1px solid var(--border); }
+.sidebar__logo { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.sidebar__logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--primary-500), var(--primary-700)); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; color: white; }
+.sidebar__logo-text { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.sidebar__logo-badge { background: var(--primary-600); color: white; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: var(--radius-sm); }
+
+/* Class Selector */
+.class-selector { margin-bottom: 16px; position: relative; }
+.class-selector__button { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: linear-gradient(135deg, var(--primary-50), var(--primary-100)); border: 1px solid var(--primary-200); border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s; text-align: left; }
+.class-selector__button:hover { border-color: var(--primary-300); background: linear-gradient(135deg, var(--primary-100), var(--primary-200)); }
+.class-selector__icon { width: 36px; height: 36px; background: var(--primary-600); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; color: white; }
+.class-selector__info { flex: 1; min-width: 0; }
+.class-selector__name { font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.class-selector__meta { display: flex; align-items: center; gap: 8px; margin-top: 3px; }
+.class-selector__status { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; }
+.class-selector__status--active { color: var(--success); }
+.class-selector__status--ended { color: var(--text-tertiary); }
+.class-selector__status-dot { width: 6px; height: 6px; border-radius: var(--radius-full); background: currentColor; }
+.class-selector__dday { font-size: 11px; font-weight: 600; color: var(--primary-600); background: var(--primary-100); padding: 2px 6px; border-radius: var(--radius-sm); }
+.class-selector__arrow { color: var(--text-tertiary); transition: transform 0.2s; }
+.class-selector__button.open .class-selector__arrow { transform: rotate(180deg); }
+
+.class-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); z-index: 1000; opacity: 0; visibility: hidden; transform: translateY(-8px); transition: all 0.2s; max-height: 300px; overflow-y: auto; }
+.class-dropdown--open { opacity: 1; visibility: visible; transform: translateY(0); }
+.class-dropdown__section { padding: 8px; }
+.class-dropdown__section-title { font-size: 10px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 10px 6px; }
+.class-dropdown__item { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: var(--radius-md); cursor: pointer; transition: background 0.2s; }
+.class-dropdown__item:hover { background: var(--surface); }
+.class-dropdown__item--active { background: var(--primary-50); }
+.class-dropdown__item--disabled { opacity: 0.5; cursor: not-allowed; }
+.class-dropdown__item-icon { width: 32px; height: 32px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.class-dropdown__item-icon--active { background: var(--primary-100); color: var(--primary-600); }
+.class-dropdown__item-icon--ended { background: var(--gray-100); color: var(--gray-400); }
+.class-dropdown__item-info { flex: 1; min-width: 0; }
+.class-dropdown__item-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.class-dropdown__item-period { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+.class-dropdown__item-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: var(--radius-full); }
+.class-dropdown__item-badge--active { background: var(--success); color: white; }
+.class-dropdown__item-badge--ended { background: var(--gray-200); color: var(--text-tertiary); }
+.class-dropdown__divider { height: 1px; background: var(--border); margin: 4px 8px; }
+
+.sidebar__new-chat { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 10px; border: 1px dashed var(--border); border-radius: var(--radius-md); background: transparent; font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; }
+.sidebar__new-chat:hover { background: var(--surface); border-color: var(--primary-300); color: var(--primary-600); }
+
+.sidebar__nav { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+.sidebar__nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius-md); color: var(--text-secondary); text-decoration: none; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; margin-bottom: 2px; }
+.sidebar__nav-item:hover { background: var(--surface); color: var(--text-primary); }
+.sidebar__nav-item--active { background: var(--primary-50); color: var(--primary-600); }
+.sidebar__nav-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
+.sidebar__nav-item--class-only { display: none; }
+.sidebar__nav-item--class-only.visible { display: flex; }
+
+.sidebar__section-title { font-size: 11px; font-weight: 600; color: var(--text-tertiary); padding: 16px 16px 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.sidebar__section-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px 8px; }
+.sidebar__section-header .sidebar__section-title { padding: 0; }
+.sidebar__section-actions { display: flex; align-items: center; gap: 4px; }
+.sidebar__section-btn { width: 28px; height: 28px; border: none; background: transparent; border-radius: var(--radius-md); cursor: pointer; color: var(--text-tertiary); display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.sidebar__section-btn:hover { background: var(--gray-100); color: var(--primary-600); }
+
+.sidebar__history { flex: 1; overflow-y: auto; padding: 0 8px; }
+.chat-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s; margin-bottom: 2px; position: relative; }
+.chat-item:hover { background: var(--surface); }
+.chat-item--active { background: var(--primary-50); }
+.chat-item__pin-dot { width: 6px; height: 6px; border-radius: var(--radius-full); background: var(--warning); flex-shrink: 0; }
+.chat-item__icon { width: 32px; height: 32px; border-radius: var(--radius-md); background: var(--gray-100); display: flex; align-items: center; justify-content: center; color: var(--text-tertiary); flex-shrink: 0; }
+.chat-item--active .chat-item__icon { background: var(--primary-100); color: var(--primary-600); }
+.chat-item__info { flex: 1; min-width: 0; }
+.chat-item__title { font-size: 13px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chat-item__meta { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+.chat-item__time { font-size: 11px; color: var(--text-tertiary); }
+.chat-item__project-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 500; padding: 1px 6px; border-radius: var(--radius-sm); background: var(--primary-100); color: var(--primary-600); max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-item__project-badge svg { width: 10px; height: 10px; flex-shrink: 0; }
+.chat-item__menu { width: 24px; height: 24px; border: none; background: transparent; border-radius: var(--radius-sm); cursor: pointer; color: var(--text-tertiary); opacity: 0; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+.chat-item:hover .chat-item__menu { opacity: 1; }
+.chat-item__menu:hover { background: var(--gray-200); color: var(--text-primary); }
+
+/* Context Menu */
+.context-menu { position: fixed; min-width: 180px; background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); z-index: 9999; padding: 4px; opacity: 0; visibility: hidden; }
+.context-menu--open { opacity: 1; visibility: visible; }
+.context-menu__item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; font-size: 13px; color: var(--text-primary); cursor: pointer; border-radius: var(--radius-md); transition: background 0.2s; }
+.context-menu__item:hover { background: var(--surface); }
+.context-menu__item--danger { color: var(--error); }
+.context-menu__item--danger:hover { background: #fef2f2; }
+.context-menu__item--project-add { color: var(--success); }
+.context-menu__item--project-add:hover { background: #ecfdf5; }
+.context-menu__item--project-change { color: var(--info); }
+.context-menu__item--project-change:hover { background: #eff6ff; }
+.context-menu__item--project-remove { color: var(--warning); }
+.context-menu__item--project-remove:hover { background: #fffbeb; }
+.context-menu__divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+.sidebar__footer { border-top: 1px solid var(--border); padding: 8px; }
+.sidebar__footer-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s; font-size: 13px; color: var(--text-secondary); }
+.sidebar__footer-item:hover { background: var(--surface); color: var(--text-primary); }
+.sidebar__user { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s; }
+.sidebar__user:hover { background: var(--surface); }
+.sidebar__user-avatar { width: 32px; height: 32px; border-radius: var(--radius-full); background: linear-gradient(135deg, var(--primary-400), var(--primary-600)); color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+.sidebar__user-name { flex: 1; font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.sidebar__user-logout { color: var(--text-tertiary); transition: color 0.2s; }
+.sidebar__user-logout:hover { color: var(--error); }
+
+/* ========== Main ========== */
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--surface); }
+
+.page-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: var(--background); border-bottom: 1px solid var(--border); }
+.page-header__left { display: flex; align-items: center; gap: 12px; }
+.page-header__title { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.page-header__right { display: flex; align-items: center; gap: 8px; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius-md); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; border: none; }
+.btn--primary { background: var(--primary-600); color: white; }
+.btn--primary:hover { background: var(--primary-700); }
+.btn--outline { background: var(--background); border: 1px solid var(--border); color: var(--text-primary); }
+.btn--outline:hover { background: var(--surface); border-color: var(--primary-300); }
+.btn--sm { padding: 6px 12px; font-size: 12px; }
+
+/* ========== Content ========== */
+.history-content { flex: 1; overflow-y: auto; padding: 24px; }
+
+/* Course Info Banner */
+.course-banner { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; background: linear-gradient(135deg, var(--primary-600), var(--primary-800)); border-radius: var(--radius-xl); margin-bottom: 24px; color: white; }
+.course-banner__left { display: flex; flex-direction: column; gap: 4px; }
+.course-banner__title { font-size: 18px; font-weight: 600; }
+.course-banner__period { font-size: 13px; opacity: 0.9; }
+.course-banner__right { display: flex; align-items: center; gap: 16px; }
+.course-banner__stat { display: flex; flex-direction: column; align-items: center; padding: 0 16px; border-right: 1px solid rgba(255,255,255,0.2); }
+.course-banner__stat:last-child { border-right: none; }
+.course-banner__stat-value { font-size: 24px; font-weight: 700; }
+.course-banner__stat-label { font-size: 11px; opacity: 0.8; }
+.course-banner__badge { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: var(--radius-full); font-size: 13px; font-weight: 600; }
+
+/* Tabs */
+.history-tabs { display: flex; gap: 4px; background: var(--background); padding: 4px; border-radius: var(--radius-lg); border: 1px solid var(--border); margin-bottom: 24px; width: fit-content; }
+.history-tab { padding: 10px 20px; border: none; background: transparent; border-radius: var(--radius-md); font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+.history-tab:hover { background: var(--surface); color: var(--text-primary); }
+.history-tab--active { background: var(--primary-600); color: white; }
+
+/* Tab Content */
+.tab-content { display: none; }
+.tab-content--active { display: block; }
+
+/* ========== 학습 성과 탭 ========== */
+.learning-sections { display: flex; flex-direction: column; gap: 24px; }
+
+.learning-section { background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-xl); overflow: hidden; }
+.learning-section__header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); background: var(--gray-50); }
+.learning-section__title { display: flex; align-items: center; gap: 12px; }
+.learning-section__icon { width: 40px; height: 40px; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; }
+.learning-section__icon--practice { background: linear-gradient(135deg, var(--primary-100), var(--primary-200)); color: var(--primary-600); }
+.learning-section__icon--kb { background: linear-gradient(135deg, var(--info-light), #bfdbfe); color: var(--info); }
+.learning-section__icon--agent { background: linear-gradient(135deg, var(--success-light), #a7f3d0); color: var(--success); }
+.learning-section__name { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+.learning-section__total { font-size: 13px; color: var(--text-tertiary); margin-top: 2px; }
+.learning-section__badge { padding: 6px 14px; border-radius: var(--radius-full); font-size: 12px; font-weight: 600; }
+.learning-section__badge--completed { background: var(--success-light); color: var(--success); }
+.learning-section__badge--progress { background: var(--warning-light); color: var(--warning); }
+
+.learning-section__body { padding: 24px; }
+
+/* Stats Grid */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.stats-grid--2col { grid-template-columns: repeat(2, 1fr); }
+
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; }
+.stat-card__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.stat-card__title { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+
+/* Model Stats */
+.model-stats { display: flex; flex-direction: column; gap: 12px; }
+.model-stat { display: flex; align-items: center; gap: 12px; }
+.model-stat__dot { width: 12px; height: 12px; border-radius: var(--radius-full); flex-shrink: 0; }
+.model-stat__dot--gpt { background: var(--gpt-color); }
+.model-stat__dot--claude { background: var(--claude-color); }
+.model-stat__dot--gemini { background: var(--gemini-color); }
+.model-stat__name { font-size: 13px; color: var(--text-primary); width: 100px; }
+.model-stat__bar { flex: 1; height: 8px; background: var(--gray-200); border-radius: var(--radius-full); overflow: hidden; }
+.model-stat__fill { height: 100%; border-radius: var(--radius-full); transition: width 0.5s ease; }
+.model-stat__fill--gpt { background: var(--gpt-color); }
+.model-stat__fill--claude { background: var(--claude-color); }
+.model-stat__fill--gemini { background: var(--gemini-color); }
+.model-stat__count { font-size: 13px; font-weight: 600; color: var(--text-primary); width: 50px; text-align: right; }
+
+/* Mode Stats */
+.mode-stats { display: flex; gap: 16px; }
+.mode-stat { flex: 1; text-align: center; padding: 16px; background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+.mode-stat__value { font-size: 28px; font-weight: 700; color: var(--primary-600); }
+.mode-stat__label { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
+
+/* Feature List */
+.feature-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.feature-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-md); }
+.feature-item__left { display: flex; align-items: center; gap: 10px; }
+.feature-item__icon { width: 28px; height: 28px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; background: var(--primary-50); color: var(--primary-600); }
+.feature-item__name { font-size: 13px; color: var(--text-primary); }
+.feature-item__value { font-size: 15px; font-weight: 600; color: var(--primary-600); }
+
+/* RAG Learning Cards */
+.rag-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.rag-card { background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; text-align: center; transition: all 0.2s; }
+.rag-card:hover { border-color: var(--primary-300); box-shadow: var(--shadow-sm); }
+.rag-card__icon { width: 48px; height: 48px; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
+.rag-card__icon--simple { background: var(--info-light); color: var(--info); }
+.rag-card__icon--advanced { background: var(--primary-100); color: var(--primary-600); }
+.rag-card__icon--compare { background: var(--warning-light); color: var(--warning); }
+.rag-card__title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+.rag-card__desc { font-size: 11px; color: var(--text-tertiary); margin-bottom: 12px; }
+.rag-card__value { font-size: 24px; font-weight: 700; color: var(--text-primary); }
+.rag-card__label { font-size: 11px; color: var(--text-tertiary); }
+.rag-card--inactive { opacity: 0.5; }
+.rag-card--inactive .rag-card__value { color: var(--text-tertiary); }
+
+/* Agent Stats */
+.agent-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+.agent-stat-box { background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; text-align: center; }
+.agent-stat-box__value { font-size: 32px; font-weight: 700; color: var(--primary-600); }
+.agent-stat-box__label { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
+
+/* Agent List - Color Bar Style */
+.agent-list { display: flex; flex-direction: column; gap: 8px; }
+.agent-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; padding-left: 20px; background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-md); position: relative; overflow: hidden; }
+.agent-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--gray-300); }
+.agent-item--blue::before { background: linear-gradient(180deg, #3b82f6, #2563eb); }
+.agent-item--orange::before { background: linear-gradient(180deg, #f97316, #ea580c); }
+.agent-item--teal::before { background: linear-gradient(180deg, #14b8a6, #0d9488); }
+.agent-item__info { flex: 1; }
+.agent-item__name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.agent-item__meta { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+.agent-item__badge { padding: 4px 10px; border-radius: var(--radius-full); font-size: 11px; font-weight: 500; }
+.agent-item__badge--created { background: var(--primary-100); color: var(--primary-600); }
+.agent-item__badge--template { background: var(--gray-100); color: var(--text-secondary); }
+.agent-item__count { font-size: 13px; color: var(--text-secondary); }
+
+/* ========== 대화 기록 탭 ========== */
+.toolbar { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+.search-box { position: relative; flex: 1; max-width: 320px; }
+.search-box__icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-tertiary); }
+.search-box__input { width: 100%; padding: 10px 12px 10px 40px; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 13px; background: var(--background); transition: all 0.2s; }
+.search-box__input:focus { outline: none; border-color: var(--primary-400); box-shadow: 0 0 0 3px var(--primary-100); }
+
+/* Sort Selector Dropdown */
+.sort-selector { position: relative; }
+.sort-selector__button { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 13px; font-weight: 500; color: var(--text-primary); cursor: pointer; transition: all 0.2s; }
+.sort-selector__button:hover { border-color: var(--primary-300); background: var(--primary-50); }
+.sort-selector__button.open { border-color: var(--primary-400); background: var(--primary-50); }
+.sort-selector__arrow { color: var(--text-tertiary); transition: transform 0.2s; }
+.sort-selector__button.open .sort-selector__arrow { transform: rotate(180deg); }
+.sort-dropdown { position: absolute; top: calc(100% + 4px); right: 0; min-width: 140px; background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); z-index: 100; opacity: 0; visibility: hidden; transform: translateY(-8px); transition: all 0.2s; padding: 4px; }
+.sort-dropdown--open { opacity: 1; visibility: visible; transform: translateY(0); }
+.sort-dropdown__item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; font-size: 13px; color: var(--text-secondary); cursor: pointer; border-radius: var(--radius-md); transition: all 0.2s; }
+.sort-dropdown__item:hover { background: var(--surface); color: var(--text-primary); }
+.sort-dropdown__item--active { color: var(--primary-600); font-weight: 500; }
+.sort-dropdown__item svg { opacity: 0; color: var(--primary-600); }
+.sort-dropdown__item--active svg { opacity: 1; }
+
+/* Conversation List */
+.conversation-list { display: flex; flex-direction: column; gap: 8px; }
+.conversation-item { display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-lg); cursor: pointer; transition: all 0.2s; }
+.conversation-item:hover { border-color: var(--primary-300); box-shadow: var(--shadow-sm); }
+.conversation-item__model { width: 40px; height: 40px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.conversation-item__model--gpt { background: var(--gpt-color); }
+.conversation-item__model--claude { background: var(--claude-color); }
+.conversation-item__model--gemini { background: var(--gemini-color); }
+.conversation-item__model--compare { background: linear-gradient(135deg, var(--primary-500), var(--info)); font-size: 10px; }
+
+.conversation-item__content { flex: 1; min-width: 0; }
+.conversation-item__title { font-size: 14px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+.conversation-item__preview { font-size: 12px; color: var(--text-tertiary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.conversation-item__tags { display: flex; gap: 6px; flex-shrink: 0; }
+.conversation-item__tag { font-size: 11px; padding: 4px 10px; border-radius: var(--radius-full); font-weight: 500; }
+.conversation-item__tag--kb { background: var(--info-light); color: var(--info); }
+.conversation-item__tag--agent { background: var(--success-light); color: var(--success); }
+
+.conversation-item__meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; min-width: 80px; }
+.conversation-item__time { font-size: 11px; color: var(--text-tertiary); }
+.conversation-item__turns { font-size: 11px; color: var(--text-tertiary); display: flex; align-items: center; gap: 4px; }
+
+/* Pagination */
+.pagination { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+.pagination__btn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); font-size: 13px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; }
+.pagination__btn:hover:not(:disabled) { border-color: var(--primary-300); color: var(--text-primary); }
+.pagination__btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.pagination__info { font-size: 13px; color: var(--text-tertiary); padding: 0 16px; }
+
+/* Toast */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--gray-800); color: white; padding: 12px 20px; border-radius: var(--radius-lg); font-size: 13px; z-index: 9999; box-shadow: var(--shadow-lg); animation: slideUp 0.3s ease; }
+.toast--success { background: var(--success); }
+@keyframes slideUp { from { transform: translate(-50%, 20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+
+/* Modal */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; }
+.modal-overlay--open { opacity: 1; visibility: visible; }
+.modal { background: var(--background); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); width: 100%; max-width: 480px; max-height: 90vh; overflow: hidden; transform: scale(0.95); transition: transform 0.2s; }
+.modal-overlay--open .modal { transform: scale(1); }
+.modal__header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+.modal__title { font-size: 16px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+.modal__close { width: 32px; height: 32px; border: none; background: transparent; border-radius: var(--radius-md); cursor: pointer; color: var(--text-tertiary); display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.modal__close:hover { background: var(--gray-100); color: var(--text-primary); }
+.modal__body { padding: 20px; max-height: 60vh; overflow-y: auto; }
+.modal__footer { display: flex; justify-content: flex-end; gap: 8px; padding: 16px 20px; border-top: 1px solid var(--border); background: var(--gray-50); }
+.modal__btn { padding: 8px 16px; border: 1px solid var(--border); background: var(--background); border-radius: var(--radius-md); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+.modal__btn:hover { background: var(--gray-100); }
+.modal__btn--primary { background: var(--primary-600); border-color: var(--primary-600); color: white; }
+.modal__btn--primary:hover { background: var(--primary-700); }
+.modal__btn--danger { background: var(--error); border-color: var(--error); color: white; }
+.modal__btn--danger:hover { background: #dc2626; }
+
+/* Popup Styles */
+.popup-header { display: flex; align-items: center; gap: 12px; padding: 20px; border-bottom: 1px solid var(--border); }
+.popup-header__icon { width: 40px; height: 40px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.popup-header__icon--purple { background: var(--primary-100); color: var(--primary-600); }
+.popup-header__icon--blue { background: #dbeafe; color: var(--info); }
+.popup-header__icon--warning { background: #fef3c7; color: #f59e0b; }
+.popup-header__text { flex: 1; }
+.popup-header__title { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+.popup-header__subtitle { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+.popup-close { width: 32px; height: 32px; border: none; background: transparent; border-radius: var(--radius-md); cursor: pointer; color: var(--text-tertiary); display: flex; align-items: center; justify-content: center; transition: all 0.15s ease; }
+.popup-close:hover { background: var(--gray-100); color: var(--text-primary); }
+
+.popup-current-banner { display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: #fef3c7; border-bottom: 1px solid #fcd34d; font-size: 12px; color: #92400e; }
+.popup-current-banner__icon { width: 16px; height: 16px; flex-shrink: 0; }
+
+.popup-search-bar { padding: 16px 20px; border-bottom: 1px solid var(--border); }
+.popup-search { position: relative; }
+.popup-search__icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-tertiary); pointer-events: none; }
+.popup-search__input { width: 100%; padding: 10px 12px 10px 40px; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 13px; font-family: var(--font-sans); background: var(--background); transition: all 0.15s ease; }
+.popup-search__input:focus { outline: none; border-color: var(--primary-400); box-shadow: 0 0 0 3px var(--primary-100); }
+.popup-search__input::placeholder { color: var(--text-tertiary); }
+
+.popup-list { max-height: 280px; overflow-y: auto; padding: 8px; }
+.popup-list__empty { text-align: center; padding: 40px 20px; color: var(--text-tertiary); font-size: 13px; }
+.popup-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: var(--radius-md); cursor: pointer; transition: background 0.15s ease; border: 1px solid transparent; }
+.popup-item:hover { background: var(--gray-50); }
+.popup-item--selected { background: var(--primary-50); border-color: var(--primary-200); }
+.popup-item--current { background: var(--gray-50); opacity: 0.6; cursor: default; }
+.popup-item__color { width: 3px; height: 40px; border-radius: 2px; flex-shrink: 0; }
+.popup-item__radio { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s ease; background: var(--background); }
+.popup-item--selected .popup-item__radio { border-color: var(--primary-600); }
+.popup-item__radio-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary-600); opacity: 0; transition: opacity 0.15s ease; }
+.popup-item--selected .popup-item__radio-dot { opacity: 1; }
+.popup-item__info { flex: 1; min-width: 0; }
+.popup-item__name { font-size: 14px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 8px; }
+.popup-item__meta { display: flex; align-items: center; gap: 8px; margin-top: 4px; font-size: 12px; color: var(--text-tertiary); }
+.popup-item__badge { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: var(--radius-full); background: var(--primary-100); color: var(--primary-600); }
+
+.popup-footer { display: flex; gap: 12px; padding: 20px 24px; border-top: 1px solid var(--border); background: var(--background); }
+.popup-footer__btn { flex: 1; padding: 12px 24px; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s ease; background: var(--background); color: var(--text-primary); text-align: center; }
+.popup-footer__btn:hover { background: var(--gray-100); }
+.popup-footer__btn--primary { background: var(--primary-600); border-color: var(--primary-600); color: white; }
+.popup-footer__btn--primary:hover { background: var(--primary-700); }
+.popup-footer__btn--primary:disabled { background: var(--gray-300); border-color: var(--gray-300); cursor: not-allowed; }
+.popup-footer__btn--danger { background: var(--error); border-color: var(--error); color: white; }
+.popup-footer__btn--danger:hover { background: #dc2626; }
+
+/* Confirm Modal */
+.confirm-modal { text-align: center; padding: 40px 24px 24px; }
+.confirm-modal__icon { width: 52px; height: 52px; margin: 0 auto 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.confirm-modal__icon--warning { background: #fef3c7; color: #f59e0b; }
+.confirm-modal__icon--danger { background: #fef2f2; color: var(--error); }
+.confirm-modal__icon svg { width: 24px; height: 24px; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.confirm-modal__title { font-size: 17px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+.confirm-modal__desc { font-size: 14px; color: var(--text-primary); line-height: 1.5; }
+.confirm-modal__subdesc { font-size: 13px; color: var(--text-tertiary); margin-top: 6px; }
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .rag-cards { grid-template-columns: repeat(2, 1fr); }
+    .agent-summary { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+    .stats-grid { grid-template-columns: 1fr; }
+    .rag-cards { grid-template-columns: 1fr; }
+    .feature-list { grid-template-columns: 1fr; }
+    .course-banner { flex-direction: column; gap: 16px; text-align: center; }
+    .course-banner__right { flex-wrap: wrap; justify-content: center; }
+}
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar__header">
+                <div class="sidebar__logo">
+                    <div class="sidebar__logo-icon">
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    </div>
+                    <span class="sidebar__logo-text">GrowFit</span>
+                    <span class="sidebar__logo-badge">AI</span>
+                </div>
+
+                <div class="class-selector">
+                    <button class="class-selector__button" id="classButton" onclick="toggleClassDropdown()">
+                        <div class="class-selector__icon">
+                            <svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                        </div>
+                        <div class="class-selector__info">
+                            <div class="class-selector__name" id="selectedClassName">AI 기초 실습</div>
+                            <div class="class-selector__meta">
+                                <span class="class-selector__status class-selector__status--active" id="selectedClassStatus">
+                                    <span class="class-selector__status-dot"></span><span id="selectedClassStatusText">진행 중</span>
+                                </span>
+                                <span class="class-selector__dday" id="selectedClassDday">D-15</span>
+                            </div>
+                        </div>
+                        <svg class="icon icon--sm class-selector__arrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+
+                    <div class="class-dropdown" id="classDropdown">
+                        <div class="class-dropdown__section">
+                            <div class="class-dropdown__section-title">진행 중인 클래스</div>
+                            <div class="class-dropdown__item class-dropdown__item--active" data-class-id="class-1" onclick="selectClass('class-1', 'AI 기초 실습', 'active', 15)">
+                                <div class="class-dropdown__item-icon class-dropdown__item-icon--active"><svg class="icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+                                <div class="class-dropdown__item-info"><div class="class-dropdown__item-name">AI 기초 실습</div><div class="class-dropdown__item-period">2025.11.01 ~ 2025.12.01</div></div>
+                                <span class="class-dropdown__item-badge class-dropdown__item-badge--active">D-15</span>
+                            </div>
+                            <div class="class-dropdown__item" data-class-id="class-2" onclick="selectClass('class-2', '프롬프트 엔지니어링', 'active', 30)">
+                                <div class="class-dropdown__item-icon class-dropdown__item-icon--active"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
+                                <div class="class-dropdown__item-info"><div class="class-dropdown__item-name">프롬프트 엔지니어링</div><div class="class-dropdown__item-period">2025.11.15 ~ 2025.12.15</div></div>
+                                <span class="class-dropdown__item-badge class-dropdown__item-badge--active">D-30</span>
+                            </div>
+                        </div>
+                        <div class="class-dropdown__divider"></div>
+                        <div class="class-dropdown__section">
+                            <div class="class-dropdown__section-title">종료된 클래스</div>
+                            <div class="class-dropdown__item class-dropdown__item--disabled" onclick="selectClass('class-ended', '2024 AI 기초과정', 'ended', 0)">
+                                <div class="class-dropdown__item-icon class-dropdown__item-icon--ended"><svg class="icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+                                <div class="class-dropdown__item-info"><div class="class-dropdown__item-name">2024 AI 기초과정</div><div class="class-dropdown__item-period">2024.09.01 ~ 2024.10.31</div></div>
+                                <span class="class-dropdown__item-badge class-dropdown__item-badge--ended">종료</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="sidebar__new-chat" onclick="createNewChat()">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                    <span>새 대화</span>
+                </button>
+            </div>
+
+            <nav class="sidebar__nav">
+                <a class="sidebar__nav-item" data-page="chat" onclick="navigateTo('chat')">
+                    <span class="sidebar__nav-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+                    <span>AI 실습</span>
+                </a>
+                <a class="sidebar__nav-item" data-page="projects" onclick="navigateTo('projects')">
+                    <span class="sidebar__nav-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
+                    <span>내 프로젝트</span>
+                </a>
+                <a class="sidebar__nav-item" data-page="knowledge" onclick="navigateTo('knowledge')">
+                    <span class="sidebar__nav-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+                    <span>지식베이스</span>
+                </a>
+                <a class="sidebar__nav-item" data-page="agents" onclick="navigateTo('agents')">
+                    <span class="sidebar__nav-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="3"/><path d="M12 8v3"/></svg></span>
+                    <span>내 에이전트</span>
+                </a>
+                <a class="sidebar__nav-item" data-page="workflow" onclick="navigateTo('workflow')">
+                    <span class="sidebar__nav-icon"><svg class="icon" viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></span>
+                    <span>워크플로우</span>
+                </a>
+                <a class="sidebar__nav-item sidebar__nav-item--active" data-page="history" onclick="navigateTo('history')">
+                    <span class="sidebar__nav-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg></span>
+                    <span>내 기록</span>
+                </a>
+            </nav>
+
+            <div class="sidebar__section-header">
+                <span class="sidebar__section-title">최근 대화</span>
+                <div class="sidebar__section-actions">
+                    <button class="sidebar__section-btn" title="대화 검색" onclick="openSearchModal()">
+                        <svg class="icon icon--sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar__history" id="chatHistory"></div>
+
+            <div class="sidebar__footer">
+                <div class="sidebar__footer-item" onclick="openSettingsModal()">
+                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <span>설정</span>
+                </div>
+                <div class="sidebar__user" onclick="openProfileModal()">
+                    <div class="sidebar__user-avatar">홍</div>
+                    <span class="sidebar__user-name">홍길동</span>
+                    <svg class="icon icon--sm sidebar__user-logout" viewBox="0 0 24 24" onclick="handleLogout(event)"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+            <header class="page-header">
+                <div class="page-header__left">
+                    <h1 class="page-header__title">내 학습 기록</h1>
+                </div>
+            </header>
+
+            <div class="history-content">
+                <!-- Course Info Banner -->
+                <div class="course-banner">
+                    <div class="course-banner__left">
+                        <div class="course-banner__title" id="courseBannerTitle">AI 기초 실습</div>
+                        <div class="course-banner__period" id="courseBannerPeriod">2025.11.01 ~ 2025.12.01 (31일간)</div>
+                    </div>
+                    <div class="course-banner__right">
+                        <div class="course-banner__stat">
+                            <div class="course-banner__stat-value" id="courseTotalChats">247</div>
+                            <div class="course-banner__stat-label">총 대화</div>
+                        </div>
+                        <div class="course-banner__stat">
+                            <div class="course-banner__stat-value" id="courseLearningTime">42.5h</div>
+                            <div class="course-banner__stat-label">학습 시간</div>
+                        </div>
+                        <div class="course-banner__stat">
+                            <div class="course-banner__stat-value" id="courseLearningDays">14</div>
+                            <div class="course-banner__stat-label">학습일</div>
+                        </div>
+                        <div class="course-banner__badge" id="courseBannerBadge">D-15 진행중</div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="history-tabs">
+                    <button class="history-tab history-tab--active" onclick="switchTab('learning', event)">
+                        <svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        학습 성과
+                    </button>
+                    <button class="history-tab" onclick="switchTab('conversations', event)">
+                        <svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        대화 기록
+                    </button>
+                </div>
+
+                <!-- Tab 1: 학습 성과 -->
+                <div id="tab-learning" class="tab-content tab-content--active">
+                    <div class="learning-sections">
+                        
+                        <!-- AI 실습 학습 섹션 -->
+                        <div class="learning-section">
+                            <div class="learning-section__header">
+                                <div class="learning-section__title">
+                                    <div class="learning-section__icon learning-section__icon--practice">
+                                        <svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                    </div>
+                                    <div>
+                                        <div class="learning-section__name">AI 실습 학습</div>
+                                        <div class="learning-section__total">총 247회 대화 진행</div>
+                                    </div>
+                                </div>
+                                <span class="learning-section__badge learning-section__badge--completed">활발히 학습중</span>
+                            </div>
+                            <div class="learning-section__body">
+                                <div class="stats-grid stats-grid--2col">
+                                    <!-- 모델별 사용량 -->
+                                    <div class="stat-card">
+                                        <div class="stat-card__header">
+                                            <span class="stat-card__title">모델별 사용량</span>
+                                        </div>
+                                        <div class="model-stats">
+                                            <div class="model-stat">
+                                                <span class="model-stat__dot model-stat__dot--gpt"></span>
+                                                <span class="model-stat__name">gpt-4o-mini</span>
+                                                <div class="model-stat__bar"><div class="model-stat__fill model-stat__fill--gpt" style="width: 45%;"></div></div>
+                                                <span class="model-stat__count">112회</span>
+                                            </div>
+                                            <div class="model-stat">
+                                                <span class="model-stat__dot model-stat__dot--claude"></span>
+                                                <span class="model-stat__name">claude-3-haiku</span>
+                                                <div class="model-stat__bar"><div class="model-stat__fill model-stat__fill--claude" style="width: 30%;"></div></div>
+                                                <span class="model-stat__count">74회</span>
+                                            </div>
+                                            <div class="model-stat">
+                                                <span class="model-stat__dot model-stat__dot--gemini"></span>
+                                                <span class="model-stat__name">gemini-2.5-flash</span>
+                                                <div class="model-stat__bar"><div class="model-stat__fill model-stat__fill--gemini" style="width: 18%;"></div></div>
+                                                <span class="model-stat__count">45회</span>
+                                            </div>
+                                            <div class="model-stat">
+                                                <span class="model-stat__dot model-stat__dot--gpt"></span>
+                                                <span class="model-stat__name">gpt-3.5-turbo</span>
+                                                <div class="model-stat__bar"><div class="model-stat__fill model-stat__fill--gpt" style="width: 6%;"></div></div>
+                                                <span class="model-stat__count">16회</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 대화 모드 -->
+                                    <div class="stat-card">
+                                        <div class="stat-card__header">
+                                            <span class="stat-card__title">대화 모드</span>
+                                        </div>
+                                        <div class="mode-stats">
+                                            <div class="mode-stat">
+                                                <div class="mode-stat__value">180</div>
+                                                <div class="mode-stat__label">단일 모드</div>
+                                            </div>
+                                            <div class="mode-stat">
+                                                <div class="mode-stat__value">67</div>
+                                                <div class="mode-stat__label">비교 모드</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 상세 설정 활용 -->
+                                <div style="margin-top: 20px;">
+                                    <div class="stat-card__title" style="font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 12px;">상세 설정 활용</div>
+                                    <div class="feature-list">
+                                        <div class="feature-item">
+                                            <div class="feature-item__left">
+                                                <div class="feature-item__icon">
+                                                    <svg class="icon icon--sm" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+                                                </div>
+                                                <span class="feature-item__name">파라미터 조절</span>
+                                            </div>
+                                            <span class="feature-item__value">34회</span>
+                                        </div>
+                                        <div class="feature-item">
+                                            <div class="feature-item__left">
+                                                <div class="feature-item__icon">
+                                                    <svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                                </div>
+                                                <span class="feature-item__name">Few-shot 학습</span>
+                                            </div>
+                                            <span class="feature-item__value">18회</span>
+                                        </div>
+                                        <div class="feature-item">
+                                            <div class="feature-item__left">
+                                                <div class="feature-item__icon">
+                                                    <svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                                                </div>
+                                                <span class="feature-item__name">파일 첨부</span>
+                                            </div>
+                                            <span class="feature-item__value">42회</span>
+                                        </div>
+                                        <div class="feature-item">
+                                            <div class="feature-item__left">
+                                                <div class="feature-item__icon">
+                                                    <svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                                                </div>
+                                                <span class="feature-item__name">지식베이스 연결</span>
+                                            </div>
+                                            <span class="feature-item__value">28회</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 지식베이스 학습 섹션 -->
+                        <div class="learning-section">
+                            <div class="learning-section__header">
+                                <div class="learning-section__title">
+                                    <div class="learning-section__icon learning-section__icon--kb">
+                                        <svg class="icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                                    </div>
+                                    <div>
+                                        <div class="learning-section__name">지식베이스 학습</div>
+                                        <div class="learning-section__total">RAG 파이프라인 실습</div>
+                                    </div>
+                                </div>
+                                <span class="learning-section__badge learning-section__badge--progress">2/3 모드 학습</span>
+                            </div>
+                            <div class="learning-section__body">
+                                <div class="stats-grid" style="margin-bottom: 20px;">
+                                    <div class="stat-card" style="background: var(--info-light); border-color: transparent;">
+                                        <div style="display: flex; align-items: center; gap: 12px;">
+                                            <div style="width: 48px; height: 48px; background: white; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; color: var(--info);">
+                                                <svg class="icon icon--lg" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                            </div>
+                                            <div>
+                                                <div style="font-size: 24px; font-weight: 700; color: var(--info);">12개</div>
+                                                <div style="font-size: 12px; color: var(--text-secondary);">문서 업로드</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div style="display: flex; align-items: center; gap: 12px;">
+                                            <div style="width: 48px; height: 48px; background: var(--primary-100); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; color: var(--primary-600);">
+                                                <svg class="icon icon--lg" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                                            </div>
+                                            <div>
+                                                <div style="font-size: 24px; font-weight: 700; color: var(--primary-600);">1,248</div>
+                                                <div style="font-size: 12px; color: var(--text-secondary);">생성된 청크</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card__title" style="font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 12px;">RAG 학습 모드별 실습</div>
+                                <div class="rag-cards">
+                                    <div class="rag-card">
+                                        <div class="rag-card__icon rag-card__icon--simple">
+                                            <svg class="icon icon--lg" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                        </div>
+                                        <div class="rag-card__title">간단 RAG</div>
+                                        <div class="rag-card__desc">파일 업로드 & 바로 질문</div>
+                                        <div class="rag-card__value">8회</div>
+                                        <div class="rag-card__label">실습 완료</div>
+                                    </div>
+                                    <div class="rag-card">
+                                        <div class="rag-card__icon rag-card__icon--advanced">
+                                            <svg class="icon icon--lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                                        </div>
+                                        <div class="rag-card__title">고급 RAG</div>
+                                        <div class="rag-card__desc">청킹 & 검색 설정 커스텀</div>
+                                        <div class="rag-card__value">5회</div>
+                                        <div class="rag-card__label">실습 완료</div>
+                                    </div>
+                                    <div class="rag-card rag-card--inactive">
+                                        <div class="rag-card__icon rag-card__icon--compare">
+                                            <svg class="icon icon--lg" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                                        </div>
+                                        <div class="rag-card__title">비교 분석</div>
+                                        <div class="rag-card__desc">설정별 결과 비교</div>
+                                        <div class="rag-card__value">0회</div>
+                                        <div class="rag-card__label">아직 미실습</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 에이전트 학습 섹션 -->
+                        <div class="learning-section">
+                            <div class="learning-section__header">
+                                <div class="learning-section__title">
+                                    <div class="learning-section__icon learning-section__icon--agent">
+                                        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="3"/><path d="M12 8v3"/></svg>
+                                    </div>
+                                    <div>
+                                        <div class="learning-section__name">에이전트 학습</div>
+                                        <div class="learning-section__total">나만의 AI 에이전트 만들기</div>
+                                    </div>
+                                </div>
+                                <span class="learning-section__badge learning-section__badge--completed">3개 생성</span>
+                            </div>
+                            <div class="learning-section__body">
+                                <div class="agent-summary">
+                                    <div class="agent-stat-box">
+                                        <div class="agent-stat-box__value">3</div>
+                                        <div class="agent-stat-box__label">직접 생성</div>
+                                    </div>
+                                    <div class="agent-stat-box">
+                                        <div class="agent-stat-box__value">2</div>
+                                        <div class="agent-stat-box__label">템플릿 활용</div>
+                                    </div>
+                                    <div class="agent-stat-box">
+                                        <div class="agent-stat-box__value">45</div>
+                                        <div class="agent-stat-box__label">에이전트 대화</div>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card__title" style="font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 12px;">생성한 에이전트</div>
+                                <div class="agent-list">
+                                    <div class="agent-item agent-item--blue">
+                                        <div class="agent-item__info">
+                                            <div class="agent-item__name">코드 리뷰어</div>
+                                            <div class="agent-item__meta">Python 코드 검토 전문</div>
+                                        </div>
+                                        <span class="agent-item__badge agent-item__badge--created">직접 생성</span>
+                                        <span class="agent-item__count">18회 대화</span>
+                                    </div>
+                                    <div class="agent-item agent-item--orange">
+                                        <div class="agent-item__info">
+                                            <div class="agent-item__name">마케팅 카피라이터</div>
+                                            <div class="agent-item__meta">광고 문구 생성</div>
+                                        </div>
+                                        <span class="agent-item__badge agent-item__badge--created">직접 생성</span>
+                                        <span class="agent-item__count">15회 대화</span>
+                                    </div>
+                                    <div class="agent-item agent-item--teal">
+                                        <div class="agent-item__info">
+                                            <div class="agent-item__name">데이터 분석가</div>
+                                            <div class="agent-item__meta">템플릿에서 커스텀</div>
+                                        </div>
+                                        <span class="agent-item__badge agent-item__badge--template">템플릿</span>
+                                        <span class="agent-item__count">12회 대화</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Tab 2: 대화 기록 -->
+                <div id="tab-conversations" class="tab-content">
+                    <div class="toolbar">
+                        <div class="search-box">
+                            <svg class="icon icon--sm search-box__icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="text" class="search-box__input" placeholder="대화 검색..." oninput="searchConversations(this.value)">
+                        </div>
+                        <div class="sort-selector">
+                            <button class="sort-selector__button" id="sortButton" onclick="toggleSortDropdown()">
+                                <span id="sortLabel">최근 순</span>
+                                <svg class="icon icon--sm sort-selector__arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                            <div class="sort-dropdown" id="sortDropdown">
+                                <div class="sort-dropdown__item sort-dropdown__item--active" onclick="selectSort('recent', '최근 순')">
+                                    <svg class="icon icon--sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                    최근 순
+                                </div>
+                                <div class="sort-dropdown__item" onclick="selectSort('oldest', '오래된 순')">
+                                    <svg class="icon icon--sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                    오래된 순
+                                </div>
+                                <div class="sort-dropdown__item" onclick="selectSort('name', '이름순')">
+                                    <svg class="icon icon--sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                    이름순
+                                </div>
+                                <div class="sort-dropdown__item" onclick="selectSort('turns', '턴 수순')">
+                                    <svg class="icon icon--sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                    턴 수순
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="conversation-list">
+                        <div class="conversation-item" onclick="openConversation('conv_001')">
+                            <div class="conversation-item__model conversation-item__model--gpt">GPT</div>
+                            <div class="conversation-item__content">
+                                <div class="conversation-item__title">Python 함수 작성법과 베스트 프랙티스</div>
+                                <div class="conversation-item__preview">함수를 작성할 때 고려해야 할 베스트 프랙티스에 대해...</div>
+                            </div>
+                            <div class="conversation-item__tags">
+                                <span class="conversation-item__tag conversation-item__tag--kb">지식베이스</span>
+                            </div>
+                            <div class="conversation-item__meta">
+                                <span class="conversation-item__time">2시간 전</span>
+                                <span class="conversation-item__turns">
+                                    <svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                    12턴
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="conversation-item" onclick="openConversation('conv_002')">
+                            <div class="conversation-item__model conversation-item__model--claude">CL</div>
+                            <div class="conversation-item__content">
+                                <div class="conversation-item__title">마케팅 이메일 캠페인 작성</div>
+                                <div class="conversation-item__preview">신규 고객 유치를 위한 이메일 캠페인 시리즈를...</div>
+                            </div>
+                            <div class="conversation-item__tags">
+                                <span class="conversation-item__tag conversation-item__tag--agent">에이전트</span>
+                            </div>
+                            <div class="conversation-item__meta">
+                                <span class="conversation-item__time">어제</span>
+                                <span class="conversation-item__turns">
+                                    <svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                    8턴
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="conversation-item" onclick="openConversation('conv_003')">
+                            <div class="conversation-item__model conversation-item__model--compare">VS</div>
+                            <div class="conversation-item__content">
+                                <div class="conversation-item__title">GPT vs Claude: 데이터 분석 비교</div>
+                                <div class="conversation-item__preview">두 모델의 데이터 분석 능력을 비교해보았습니다...</div>
+                            </div>
+                            <div class="conversation-item__tags">
+                            </div>
+                            <div class="conversation-item__meta">
+                                <span class="conversation-item__time">2일 전</span>
+                                <span class="conversation-item__turns">
+                                    <svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                    15턴
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="conversation-item" onclick="openConversation('conv_004')">
+                            <div class="conversation-item__model conversation-item__model--gemini">Ge</div>
+                            <div class="conversation-item__content">
+                                <div class="conversation-item__title">UI 디자인 원칙과 색상 조합</div>
+                                <div class="conversation-item__preview">사용자 친화적인 UI를 만들기 위한 디자인 원칙...</div>
+                            </div>
+                            <div class="conversation-item__tags"></div>
+                            <div class="conversation-item__meta">
+                                <span class="conversation-item__time">3일 전</span>
+                                <span class="conversation-item__turns">
+                                    <svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                    6턴
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="conversation-item" onclick="openConversation('conv_005')">
+                            <div class="conversation-item__model conversation-item__model--gpt">GPT</div>
+                            <div class="conversation-item__content">
+                                <div class="conversation-item__title">비즈니스 보고서 작성</div>
+                                <div class="conversation-item__preview">분기별 실적 보고서를 전문적으로...</div>
+                            </div>
+                            <div class="conversation-item__tags">
+                                <span class="conversation-item__tag conversation-item__tag--kb">지식베이스</span>
+                            </div>
+                            <div class="conversation-item__meta">
+                                <span class="conversation-item__time">5일 전</span>
+                                <span class="conversation-item__turns">
+                                    <svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                    10턴
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pagination">
+                        <button class="pagination__btn" disabled>
+                            <svg class="icon icon--sm" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                            이전
+                        </button>
+                        <span class="pagination__info">1 - 20 / 247개</span>
+                        <button class="pagination__btn">
+                            다음
+                            <svg class="icon icon--sm" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Context Menu for Chat Items -->
+    <div class="context-menu" id="chatContextMenu">
+        <div class="context-menu__item" onclick="renameChat()"><svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>이름 변경</div>
+        <div class="context-menu__item" id="pinChatItem" onclick="togglePinChat()"><svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4.76z"/></svg><span id="pinChatText">고정</span></div>
+        <div class="context-menu__divider" id="projectMenuDivider" style="display: none;"></div>
+        <div class="context-menu__item context-menu__item--project-add" id="addToProjectItem" style="display: none;" onclick="addChatToProject()"><svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>프로젝트 추가</div>
+        <div class="context-menu__item context-menu__item--project-change" id="changeProjectItem" style="display: none;" onclick="changeChatProject()"><svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><path d="M12 11v6"/><path d="M9 14h6"/></svg>프로젝트 변경</div>
+        <div class="context-menu__item context-menu__item--project-remove" id="removeFromProjectItem" style="display: none;" onclick="removeChatFromProject()"><svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="9" y1="14" x2="15" y2="14"/></svg>프로젝트에서 제거</div>
+        <div class="context-menu__divider"></div>
+        <div class="context-menu__item context-menu__item--danger" onclick="deleteChat()"><svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>삭제</div>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+        <div class="modal" id="modalContent" onclick="event.stopPropagation()">
+            <div class="modal__header">
+                <h3 class="modal__title" id="modalTitle">모달 제목</h3>
+                <button class="modal__close" onclick="closeModal()">
+                    <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="modal__body" id="modalBody"></div>
+            <div class="modal__footer" id="modalFooter"></div>
+        </div>
+    </div>
+
+    <script>
+// ========== State ==========
+let currentTab = 'learning';
+let currentContextChatId = null;
+let currentContextProjectId = null;
+let selectedProjectId = null;
+
+// ========== Project Data ==========
+const projectData = [
+    { id: 'proj-1', name: 'AI 기초 실습 프로젝트', color: '#a855f7', chatCount: 5, updatedAt: '2시간 전' },
+    { id: 'proj-2', name: '프롬프트 엔지니어링', color: '#3b82f6', chatCount: 8, updatedAt: '1일 전' },
+    { id: 'proj-3', name: '마케팅 문구 생성', color: '#10b981', chatCount: 3, updatedAt: '3일 전' },
+    { id: 'proj-4', name: 'GPT vs Claude 비교분석', color: '#f59e0b', chatCount: 12, updatedAt: '5일 전' },
+    { id: 'proj-5', name: '코드 리팩토링 실습', color: '#ef4444', chatCount: 7, updatedAt: '1주 전' }
+];
+
+// ========== Chat Data ==========
+let chatData = [
+    { id: 1, title: '프롬프트 엔지니어링 ...', time: '2분 전', active: true, pinned: true, projectId: 'proj-1', projectName: 'AI 기초' },
+    { id: 2, title: 'GPT vs Claude 비교', time: '1시간 전', active: false, pinned: false, projectId: 'proj-1', projectName: 'AI 기초' },
+    { id: 3, title: '마케팅 문구 생성', time: '어제', active: false, pinned: false, projectId: null, projectName: null },
+    { id: 4, title: '코드 리뷰 요청', time: '2일 전', active: false, pinned: false, projectId: null, projectName: null }
+];
+
+// ========== Initialize ==========
+document.addEventListener('DOMContentLoaded', () => {
+    renderChatHistory();
+});
+
+// ========== Render Chat History ==========
+function renderChatHistory() {
+    const history = document.getElementById('chatHistory');
+    
+    // 고정된 대화를 위로 정렬
+    const sortedChats = [...chatData].sort((a, b) => {
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return 0;
+    });
+    
+    history.innerHTML = sortedChats.map(chat => `
+        <div class="chat-item ${chat.active ? 'chat-item--active' : ''}" onclick="loadChat(${chat.id})" data-chat-id="${chat.id}" data-project-id="${chat.projectId || ''}" data-project-name="${chat.projectName || ''}" data-pinned="${chat.pinned}">
+            ${chat.pinned ? '<div class="chat-item__pin-dot"></div>' : ''}
+            <div class="chat-item__icon">
+                <svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div class="chat-item__info">
+                <div class="chat-item__title">${chat.title}</div>
+                <div class="chat-item__meta">
+                    <span class="chat-item__time">${chat.time}</span>
+                    ${chat.projectName ? `<span class="chat-item__project-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>${chat.projectName}</span>` : ''}
+                </div>
+            </div>
+            <button class="chat-item__menu" onclick="event.stopPropagation(); showChatContextMenu(event, ${chat.id}, ${chat.projectId ? `'${chat.projectId}'` : 'null'}, ${chat.pinned})"><svg class="icon icon--sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+        </div>
+    `).join('');
+}
+
+// ========== Context Menu Functions ==========
+function showChatContextMenu(event, chatId, projectId, isPinned) {
+    event.preventDefault();
+    currentContextChatId = chatId;
+    currentContextProjectId = projectId;
+    
+    const menu = document.getElementById('chatContextMenu');
+    const pinText = document.getElementById('pinChatText');
+    const projectDivider = document.getElementById('projectMenuDivider');
+    const addToProject = document.getElementById('addToProjectItem');
+    const changeProject = document.getElementById('changeProjectItem');
+    const removeFromProject = document.getElementById('removeFromProjectItem');
+    
+    // 고정/해제 텍스트 설정
+    pinText.textContent = isPinned ? '고정 해제' : '고정';
+    
+    // 프로젝트 메뉴 표시/숨김
+    if (projectId) {
+        projectDivider.style.display = 'block';
+        addToProject.style.display = 'none';
+        changeProject.style.display = 'flex';
+        removeFromProject.style.display = 'flex';
+    } else {
+        projectDivider.style.display = 'block';
+        addToProject.style.display = 'flex';
+        changeProject.style.display = 'none';
+        removeFromProject.style.display = 'none';
+    }
+    
+    // 메뉴 위치 설정
+    menu.style.left = event.clientX + 'px';
+    menu.style.top = event.clientY + 'px';
+    menu.classList.add('context-menu--open');
+}
+
+function closeContextMenu() {
+    document.getElementById('chatContextMenu').classList.remove('context-menu--open');
+}
+
+function renameChat() {
+    closeContextMenu();
+    const newName = prompt('새 이름을 입력하세요:');
+    if (newName) {
+        const chat = chatData.find(c => c.id === currentContextChatId);
+        if (chat) {
+            chat.title = newName;
+            renderChatHistory();
+            showToast('대화 이름이 변경되었습니다', 'success');
+        }
+    }
+}
+
+function togglePinChat() {
+    closeContextMenu();
+    const chat = chatData.find(c => c.id === currentContextChatId);
+    if (chat) {
+        chat.pinned = !chat.pinned;
+        renderChatHistory();
+        showToast(chat.pinned ? '대화가 고정되었습니다' : '대화 고정이 해제되었습니다', 'success');
+    }
+}
+
+function addChatToProject() {
+    closeContextMenu();
+    openChangeProjectModal(null);
+}
+
+function changeChatProject() {
+    closeContextMenu();
+    openChangeProjectModal(currentContextProjectId);
+}
+
+function openChangeProjectModal(currentProjectId) {
+    selectedProjectId = null;
+    const currentProject = projectData.find(p => p.id === currentProjectId);
+    
+    // 모달 헤더/푸터 숨기고 body만 사용
+    document.getElementById('modalTitle').innerHTML = '';
+    document.querySelector('.modal__header').style.display = 'none';
+    document.getElementById('modalFooter').style.display = 'none';
+    
+    const modalHtml = `
+        <div class="popup-header">
+            <div class="popup-header__icon popup-header__icon--blue">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div class="popup-header__text">
+                <div class="popup-header__title">프로젝트 변경</div>
+                <div class="popup-header__subtitle">대화를 다른 프로젝트로 이동</div>
+            </div>
+            <button class="popup-close" onclick="closeModal()">
+                <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        
+        ${currentProject ? `
+            <div class="popup-current-banner">
+                <svg class="icon popup-current-banner__icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                현재 위치: <strong>${currentProject.name}</strong>
+            </div>
+        ` : ''}
+        
+        <div class="popup-search-bar">
+            <div class="popup-search">
+                <svg class="icon icon--sm popup-search__icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" class="popup-search__input" placeholder="프로젝트 검색..." oninput="filterProjects(this.value)">
+            </div>
+        </div>
+        
+        <div class="popup-list" id="projectList">
+            ${renderProjectList(currentProjectId)}
+        </div>
+        
+        <div class="popup-footer">
+            <button class="popup-footer__btn" onclick="closeModal()">취소</button>
+            <button class="popup-footer__btn popup-footer__btn--primary" id="moveProjectBtn" onclick="confirmMoveProject()" disabled>이동하기</button>
+        </div>
+    `;
+    
+    document.getElementById('modalBody').innerHTML = modalHtml;
+    document.getElementById('modalBody').style.padding = '0';
+    document.getElementById('modalOverlay').classList.add('modal-overlay--open');
+}
+
+function renderProjectList(currentProjectId) {
+    return projectData.map(proj => {
+        const isCurrent = proj.id === currentProjectId;
+        const isSelected = proj.id === selectedProjectId;
+        return `
+            <div class="popup-item ${isCurrent ? 'popup-item--current' : ''} ${isSelected ? 'popup-item--selected' : ''}" 
+                 onclick="${isCurrent ? '' : `selectProject('${proj.id}')`}">
+                <div class="popup-item__radio">
+                    <div class="popup-item__radio-dot"></div>
+                </div>
+                <div class="popup-item__color" style="background: ${proj.color}"></div>
+                <div class="popup-item__info">
+                    <div class="popup-item__name">
+                        ${proj.name}
+                        ${isCurrent ? '<span class="popup-item__badge">현재</span>' : ''}
+                    </div>
+                    <div class="popup-item__meta">
+                        <span>대화 ${proj.chatCount}개</span>
+                        <span>•</span>
+                        <span>${proj.updatedAt}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function filterProjects(query) {
+    const filtered = projectData.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));
+    document.getElementById('projectList').innerHTML = filtered.length > 0 
+        ? filtered.map(proj => {
+            const isCurrent = proj.id === currentContextProjectId;
+            const isSelected = proj.id === selectedProjectId;
+            return `
+                <div class="popup-item ${isCurrent ? 'popup-item--current' : ''} ${isSelected ? 'popup-item--selected' : ''}" 
+                     onclick="${isCurrent ? '' : `selectProject('${proj.id}')`}">
+                    <div class="popup-item__radio">
+                        <div class="popup-item__radio-dot"></div>
+                    </div>
+                    <div class="popup-item__color" style="background: ${proj.color}"></div>
+                    <div class="popup-item__info">
+                        <div class="popup-item__name">
+                            ${proj.name}
+                            ${isCurrent ? '<span class="popup-item__badge">현재</span>' : ''}
+                        </div>
+                        <div class="popup-item__meta">
+                            <span>대화 ${proj.chatCount}개</span>
+                            <span>•</span>
+                            <span>${proj.updatedAt}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('')
+        : '<div class="popup-list__empty">검색 결과가 없습니다</div>';
+}
+
+function selectProject(projectId) {
+    selectedProjectId = projectId;
+    document.querySelectorAll('.popup-item').forEach(item => {
+        item.classList.remove('popup-item--selected');
+    });
+    event.currentTarget.classList.add('popup-item--selected');
+    document.getElementById('moveProjectBtn').disabled = false;
+}
+
+function confirmMoveProject() {
+    if (!selectedProjectId) return;
+    
+    const chat = chatData.find(c => c.id === currentContextChatId);
+    const project = projectData.find(p => p.id === selectedProjectId);
+    
+    if (chat && project) {
+        chat.projectId = selectedProjectId;
+        chat.projectName = project.name.length > 10 ? project.name.substring(0, 10) + '...' : project.name;
+        renderChatHistory();
+        closeModal();
+        showToast(`"${project.name}" 프로젝트로 이동되었습니다`, 'success');
+    }
+}
+
+function removeChatFromProject() {
+    closeContextMenu();
+    openRemoveFromProjectModal();
+}
+
+function openRemoveFromProjectModal() {
+    // 모달 헤더/푸터 숨기고 body만 사용
+    document.getElementById('modalTitle').innerHTML = '';
+    document.querySelector('.modal__header').style.display = 'none';
+    document.getElementById('modalFooter').style.display = 'none';
+    
+    const modalHtml = `
+        <div class="confirm-modal">
+            <div class="confirm-modal__icon confirm-modal__icon--warning">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+            </div>
+            <div class="confirm-modal__title">프로젝트에서 제거</div>
+            <div class="confirm-modal__desc">프로젝트에서 이 대화를 제거하시겠습니까?</div>
+            <div class="confirm-modal__subdesc">대화는 삭제되지 않고 "최근 대화" 목록으로 이동합니다.</div>
+        </div>
+        <div class="popup-footer">
+            <button class="popup-footer__btn" onclick="closeModal()">취소</button>
+            <button class="popup-footer__btn popup-footer__btn--primary" onclick="confirmRemoveFromProject()">제거</button>
+        </div>
+    `;
+    
+    document.getElementById('modalBody').innerHTML = modalHtml;
+    document.getElementById('modalBody').style.padding = '0';
+    document.getElementById('modalOverlay').classList.add('modal-overlay--open');
+}
+
+function confirmRemoveFromProject() {
+    const chat = chatData.find(c => c.id === currentContextChatId);
+    if (chat) {
+        chat.projectId = null;
+        chat.projectName = null;
+        renderChatHistory();
+        closeModal();
+        showToast('프로젝트에서 제거되었습니다', 'success');
+    }
+}
+
+function deleteChat() {
+    closeContextMenu();
+    openDeleteModal();
+}
+
+function openDeleteModal() {
+    // 모달 헤더/푸터 숨기고 body만 사용
+    document.getElementById('modalTitle').innerHTML = '';
+    document.querySelector('.modal__header').style.display = 'none';
+    document.getElementById('modalFooter').style.display = 'none';
+    
+    const modalHtml = `
+        <div class="confirm-modal">
+            <div class="confirm-modal__icon confirm-modal__icon--danger">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </div>
+            <div class="confirm-modal__title">대화 삭제</div>
+            <div class="confirm-modal__desc">이 대화를 삭제하시겠습니까?</div>
+            <div class="confirm-modal__subdesc">삭제된 대화는 복구할 수 없습니다.</div>
+        </div>
+        <div class="popup-footer">
+            <button class="popup-footer__btn" onclick="closeModal()">취소</button>
+            <button class="popup-footer__btn popup-footer__btn--danger" onclick="confirmDeleteChat()">삭제</button>
+        </div>
+    `;
+    
+    document.getElementById('modalBody').innerHTML = modalHtml;
+    document.getElementById('modalBody').style.padding = '0';
+    document.getElementById('modalOverlay').classList.add('modal-overlay--open');
+}
+
+function confirmDeleteChat() {
+    chatData = chatData.filter(c => c.id !== currentContextChatId);
+    renderChatHistory();
+    closeModal();
+    showToast('대화가 삭제되었습니다', 'success');
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('modal-overlay--open');
+    // 모달 상태 리셋
+    document.querySelector('.modal__header').style.display = '';
+    document.getElementById('modalBody').style.padding = '';
+}
+
+function openModal(title, body, showFooter = true, footerButtons = []) {
+    // 헤더 보이도록 설정
+    document.querySelector('.modal__header').style.display = '';
+    document.getElementById('modalBody').style.padding = '';
+    
+    document.getElementById('modalTitle').innerHTML = title;
+    document.getElementById('modalBody').innerHTML = body;
+    
+    const footer = document.getElementById('modalFooter');
+    if (showFooter && footerButtons.length > 0) {
+        footer.style.display = 'flex';
+        footer.innerHTML = footerButtons.map(btn => 
+            `<button class="modal__btn ${btn.primary ? 'modal__btn--primary' : ''}" onclick="${btn.action}">${btn.text}</button>`
+        ).join('');
+    } else if (showFooter) {
+        footer.style.display = 'flex';
+        footer.innerHTML = '<button class="modal__btn modal__btn--primary" onclick="closeModal()">확인</button>';
+    } else {
+        footer.style.display = 'none';
+    }
+    
+    document.getElementById('modalOverlay').classList.add('modal-overlay--open');
+}
+
+function loadChat(chatId) {
+    chatData.forEach(chat => chat.active = (chat.id === chatId));
+    renderChatHistory();
+    showToast('대화를 불러옵니다', 'info');
+}
+
+// Close context menu on outside click
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.context-menu') && !e.target.closest('.chat-item__menu')) {
+        closeContextMenu();
+    }
+});
+
+// ========== Class Selector ==========
+function toggleClassDropdown() {
+    const btn = document.getElementById('classButton');
+    const dropdown = document.getElementById('classDropdown');
+    const isOpen = dropdown.classList.contains('class-dropdown--open');
+    
+    if (isOpen) {
+        btn.classList.remove('open');
+        dropdown.classList.remove('class-dropdown--open');
+    } else {
+        btn.classList.add('open');
+        dropdown.classList.add('class-dropdown--open');
+    }
+}
+
+// ========== Class Data ==========
+const classDetails = {
+    'class-1': {
+        name: 'AI 기초 실습',
+        period: '2025.11.01 ~ 2025.12.01',
+        days: 31,
+        dday: 15,
+        status: 'active',
+        stats: { chats: 247, time: '42.5h', learningDays: 14 }
+    },
+    'class-2': {
+        name: '프롬프트 엔지니어링',
+        period: '2025.11.15 ~ 2025.12.15',
+        days: 31,
+        dday: 30,
+        status: 'active',
+        stats: { chats: 156, time: '28.3h', learningDays: 9 }
+    },
+    'class-ended': {
+        name: '2024 AI 기초과정',
+        period: '2024.09.01 ~ 2024.10.31',
+        days: 61,
+        dday: 0,
+        status: 'ended',
+        stats: { chats: 423, time: '68.2h', learningDays: 45 }
+    }
+};
+
+function selectClass(classId, className, status, dday) {
+    // 사이드바 클래스 선택기 업데이트
+    document.getElementById('selectedClassName').textContent = className;
+    document.getElementById('selectedClassDday').textContent = dday > 0 ? `D-${dday}` : '종료';
+    
+    // 상태 표시 업데이트
+    const statusEl = document.getElementById('selectedClassStatus');
+    const statusTextEl = document.getElementById('selectedClassStatusText');
+    if (status === 'ended') {
+        statusEl.classList.remove('class-selector__status--active');
+        statusEl.classList.add('class-selector__status--ended');
+        statusTextEl.textContent = '종료됨';
+    } else {
+        statusEl.classList.remove('class-selector__status--ended');
+        statusEl.classList.add('class-selector__status--active');
+        statusTextEl.textContent = '진행 중';
+    }
+    
+    // course-banner 업데이트
+    const classInfo = classDetails[classId];
+    if (classInfo) {
+        document.getElementById('courseBannerTitle').textContent = classInfo.name;
+        document.getElementById('courseBannerPeriod').textContent = `${classInfo.period} (${classInfo.days}일간)`;
+        document.getElementById('courseTotalChats').textContent = classInfo.stats.chats;
+        document.getElementById('courseLearningTime').textContent = classInfo.stats.time;
+        document.getElementById('courseLearningDays').textContent = classInfo.stats.learningDays;
+        
+        const badgeEl = document.getElementById('courseBannerBadge');
+        if (classInfo.status === 'ended') {
+            badgeEl.textContent = '종료됨';
+            badgeEl.style.background = 'var(--gray-200)';
+            badgeEl.style.color = 'var(--text-tertiary)';
+        } else {
+            badgeEl.textContent = `D-${classInfo.dday} 진행중`;
+            badgeEl.style.background = '';
+            badgeEl.style.color = '';
+        }
+    }
+    
+    // 드롭다운 아이템 활성화 상태 업데이트
+    document.querySelectorAll('.class-dropdown__item').forEach(item => {
+        item.classList.remove('class-dropdown__item--active');
+    });
+    event.currentTarget.classList.add('class-dropdown__item--active');
+    
+    toggleClassDropdown();
+    showToast(`${className} 클래스로 전환`, 'success');
+}
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.class-selector')) {
+        const btn = document.getElementById('classButton');
+        const dropdown = document.getElementById('classDropdown');
+        if (btn && dropdown) {
+            btn.classList.remove('open');
+            dropdown.classList.remove('class-dropdown--open');
+        }
+    }
+});
+
+// ========== Tab Navigation ==========
+function switchTab(tab, e) {
+    currentTab = tab;
+    
+    document.querySelectorAll('.history-tab').forEach(btn => {
+        btn.classList.remove('history-tab--active');
+    });
+    if (e && e.target) {
+        const clickedTab = e.target.closest('.history-tab');
+        if (clickedTab) clickedTab.classList.add('history-tab--active');
+    }
+    
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('tab-content--active');
+    });
+    const tabContent = document.getElementById(`tab-${tab}`);
+    if (tabContent) tabContent.classList.add('tab-content--active');
+}
+
+// ========== Sort Dropdown ==========
+function toggleSortDropdown() {
+    const btn = document.getElementById('sortButton');
+    const dropdown = document.getElementById('sortDropdown');
+    const isOpen = dropdown.classList.contains('sort-dropdown--open');
+    
+    if (isOpen) {
+        btn.classList.remove('open');
+        dropdown.classList.remove('sort-dropdown--open');
+    } else {
+        btn.classList.add('open');
+        dropdown.classList.add('sort-dropdown--open');
+    }
+}
+
+function selectSort(sortType, label) {
+    document.getElementById('sortLabel').textContent = label;
+    
+    document.querySelectorAll('.sort-dropdown__item').forEach(item => {
+        item.classList.remove('sort-dropdown__item--active');
+    });
+    event.currentTarget.classList.add('sort-dropdown__item--active');
+    
+    toggleSortDropdown();
+    showToast(`${label}으로 정렬`, 'info');
+}
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.sort-selector')) {
+        const btn = document.getElementById('sortButton');
+        const dropdown = document.getElementById('sortDropdown');
+        if (btn && dropdown) {
+            btn.classList.remove('open');
+            dropdown.classList.remove('sort-dropdown--open');
+        }
+    }
+});
+
+// ========== Search ==========
+function searchConversations(term) {
+    console.log('Searching:', term);
+}
+
+// ========== Conversation Actions ==========
+function openConversation(convId) {
+    showToast('대화 상세 보기로 이동', 'info');
+}
+
+// ========== Navigation ==========
+function navigateTo(page) {
+    showToast(`${page} 페이지로 이동`, 'info');
+}
+
+function createNewChat() {
+    showToast('새 대화를 시작합니다', 'success');
+}
+
+function openSearchModal() {
+    openModal('대화 검색', `
+        <div style="margin-bottom: 16px;">
+            <div style="position: relative;">
+                <svg class="icon icon--sm" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-tertiary);" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="searchInput" placeholder="대화 내용 검색..." style="width: 100%; padding: 10px 12px 10px 40px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px;" oninput="filterSearchResults(this.value)">
+            </div>
+        </div>
+        <div id="searchResults" style="max-height: 300px; overflow-y: auto;">
+            <p style="color: var(--text-tertiary); font-size: 13px; text-align: center; padding: 20px;">검색어를 입력하세요</p>
+        </div>
+    `, false);
+    setTimeout(() => document.getElementById('searchInput')?.focus(), 100);
+}
+
+function filterSearchResults(query) {
+    const results = document.getElementById('searchResults');
+    if (!query.trim()) {
+        results.innerHTML = '<p style="color: var(--text-tertiary); font-size: 13px; text-align: center; padding: 20px;">검색어를 입력하세요</p>';
+        return;
+    }
+    
+    // chatData에서 검색
+    const filteredChats = chatData.filter(chat => 
+        chat.title.toLowerCase().includes(query.toLowerCase())
+    );
+    
+    if (filteredChats.length === 0) {
+        results.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: var(--text-tertiary);">
+                <svg class="icon icon--lg" style="margin-bottom: 12px; opacity: 0.5;" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <p style="font-size: 13px;">"${escapeHtml(query)}"에 대한 검색 결과가 없습니다</p>
+            </div>
+        `;
+        return;
+    }
+    
+    results.innerHTML = `
+        <div style="display: grid; gap: 8px;">
+            ${filteredChats.map(chat => `
+                <div style="padding: 12px; background: var(--surface); border-radius: 8px; cursor: pointer; transition: all 0.2s;" 
+                     onclick="loadChat(${chat.id}); closeModal();"
+                     onmouseover="this.style.background='var(--primary-50)'"
+                     onmouseout="this.style.background='var(--surface)'">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 32px; height: 32px; background: var(--primary-100); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--primary-600);">
+                            <svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        </div>
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="font-weight: 500; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(chat.title)}</div>
+                            <div style="font-size: 11px; color: var(--text-tertiary); display: flex; align-items: center; gap: 8px;">
+                                <span>${chat.time}</span>
+                                ${chat.projectName ? `<span style="background: var(--primary-100); color: var(--primary-600); padding: 1px 6px; border-radius: 4px; font-size: 10px;">${chat.projectName}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function openSettingsModal() {
+    showToast('설정 모달 열기', 'info');
+}
+
+function openProfileModal() {
+    showToast('프로필 모달 열기', 'info');
+}
+
+function handleLogout(e) {
+    e.stopPropagation();
+    showToast('로그아웃 합니다', 'info');
+}
+
+function exportData() {
+    showToast('학습 기록을 내보내는 중...', 'info');
+}
+
+// ========== Toast ==========
+function showToast(message, type = 'info') {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    
+    const toast = document.createElement('div');
+    toast.className = `toast${type !== 'info' ? ' toast--' + type : ''}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 2500);
+}
+
+console.log('GrowFit - My Learning History Page Loaded');
+    </script>
+</body>
+</html>
