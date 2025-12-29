@@ -88,8 +88,7 @@
             "group": "시작하기",
             "pages": [
               "partner/index",
-              "getting-started/quickstart",
-              "getting-started/env"
+              "getting-started/quickstart"
             ]
           },
           {
@@ -133,8 +132,6 @@
             "group": "시작하기",
             "pages": [
               "ops/index",
-              "getting-started/env",
-              "troubleshooting",
               "glossary"
             ]
           },
