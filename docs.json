@@ -158,6 +158,17 @@
         ]
       },
       {
+        "tab": "Model cost",
+        "groups": [
+          {
+            "group": "요금표",
+            "pages": [
+              "cost/model-cost"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "API reference",
         "groups": [
           {
