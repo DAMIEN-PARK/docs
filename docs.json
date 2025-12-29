@@ -23,20 +23,17 @@
               "student/index",
               "index",
               "getting-started/quickstart",
-              "getting-started/env",
-              "faq",
-              "troubleshooting",
               "glossary"
             ]
           },
           {
             "group": "튜토리얼",
             "pages": [
-              "tutorials/01-params",
-              "tutorials/02-rag",
-              "tutorials/03-rerank",
-              "tutorials/04-agent",
-              "tutorials/05-ab-compare"
+              "tutorials/practice",
+              "tutorials/project",
+              "tutorials/knowledge_base",
+              "tutorials/agent",
+              "tutorials/record"
             ]
           },
           {
@@ -88,8 +85,7 @@
             "group": "시작하기",
             "pages": [
               "partner/index",
-              "getting-started/quickstart",
-              "getting-started/env"
+              "getting-started/quickstart"
             ]
           },
           {
@@ -133,8 +129,6 @@
             "group": "시작하기",
             "pages": [
               "ops/index",
-              "getting-started/env",
-              "troubleshooting",
               "glossary"
             ]
           },
