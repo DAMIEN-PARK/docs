@@ -1,42 +1,38 @@
-﻿---
-title: "Practice에서 Agents 사용"
-description: "실습에서 에이전트 적용"
 ---
+title: "Practice에서 Agents 사용"
+description: "세션에서 agent ON/OFF를 비교하며 시스템 프롬프트 효과 측정"
+---
+
 ## 이 문서에서 하는 것
-- 같은 질문을 여러 설정으로 실행해서 결과/비용/속도를 비교해.
+- Practice 세션에서 agent를 적용하고, 기본 모델 응답과의 차이를 **품질·토큰·latency** 기준으로 비교하는 절차를 정리해.
 
 ## 준비물
 - Practice 세션(새로 만들거나 기존 세션)
-- 모델 1개 선택
-
-## 조절 변수(핵심)
-- 모델: provider/model_name
-- 파라미터: temperature, top_p, max_tokens (및 response length preset을 쓰면 같이)
-- (선택) Agents: system prompt + few-shot 예시
-- (선택) RAG: top-k/threshold/rerank
-
-## 기록할 지표
-- 지연시간(latency) / TTFT
-- 토큰(prompt/completion/total)
-- 비용(추정치)
-- 품질(정확도/가독성/근거성)
-
-## 자주 터지는 실수
-- 변수를 한 번에 여러 개 바꿈(원인 분석 불가)
-- few-shot이 너무 김(비용/지연 급증)
-- temperature 과다(사실 QA에서 환각 위험)
+- 사용할 agent 1~2개(또는 /agents/overview를 보고 새로 생성)
+- 비교용 질문 세트 5~10개
 
 ## 적용 흐름
-1) agent 선택(또는 생성)
-2) 세션에 적용
-3) 동일 질문으로 agent OFF/ON 비교
+1) **세션 열기**: Practice에서 질문 세트를 불러오거나 새로 만든다.
+2) **agent 선택**: 우측 패널 또는 상단 드롭다운에서 agent를 선택하고, 필요한 경우 **system prompt/예시**를 편집한다.
+3) **RAG/도구 토글**: agent가 요구하는 검색이나 도구 사용을 켜고 끈다. 기준선은 RAG/OFF + 도구/OFF.
+4) **실행 및 비교**: 동일 질문을 baseline(에이전트 OFF)과 agent ON 상태로 실행해 응답, 토큰, latency를 기록한다.
+5) **리그레이션 방지**: 품질이 좋아진 설정은 별도 세션으로 저장하거나, agent를 포크해 버전 관리한다.
+
+## 기록할 지표
+- **품질**: 형식/톤/금지 항목 준수 여부, hallucination 감소 여부.
+- **토큰/비용**: system prompt와 few-shot 길이에 따른 prompt 토큰 증가 폭, RAG 컨텍스트 길이.
+- **지연시간**: TTFT/전체 latency. rerank나 도구 호출을 켰을 때 증가폭을 기록.
 
 ## 관찰 포인트
-- 형식/톤/규칙 준수
-- 토큰/비용 증가폭(system prompt + 예시)
+- **출력 안정성**: 같은 질문에서 agent ON/OFF 응답 형식이 얼마나 달라지는지 확인.
+- **안전 규칙**: 금지어, 답변 길이 제한 등 system prompt 규칙이 지켜지는지 체크.
+- **컨텍스트 사용**: agent가 RAG 출처를 제대로 인용하는지(응답 하단 출처 확인).
+
+## 자주 터지는 실수와 예방
+- 질문마다 파라미터/에이전트를 동시에 바꾸기 → 한 번에 하나만 바꾸고 로그에 남긴다.
+- few-shot 예시가 너무 길어 latency 폭증 → 예시는 1~3개, 형식 위주로 짧게.
+- 클래스별로 다른 agent를 혼용 → 세션명/노트에 사용 agent를 명시해 재현성을 확보.
 
 ## 다음 문서
-- /agents/overview
-- /agents/sharing
-- /agents/forking
-
+- /agents/overview (agent 구조와 권장 작성법)
+- /practice/evaluation (평가 지표/포맷 예시)

@@ -1,40 +1,34 @@
-﻿---
-title: "Agents 개요"
-description: "에이전트 개념과 전체 흐름"
 ---
-## 이 문서에서 하는 것
-- 에이전트를 만들어 출력 형식/행동을 안정적으로 제어하고, 공유/포크로 교육 운영에 활용해.
+title: "Agents 개요"
+description: "에이전트 구성 요소와 GrowFit UI에서의 라이프사이클"
+---
 
-## agent 구성(권장)
-- system prompt: 역할/규칙/출력 형식
-- few-shot 예시(선택): 1~3개(짧고 형식 중심)
-- 기본 옵션(선택): 스타일 프리셋/파라미터 기본값
+## 이 문서에서 하는 것
+- 에이전트를 만들고(시스템 프롬프트/예시), 클래스에 배포·공유·포크하는 과정을 **내 에이전트** 화면 기준으로 정리해.
+
+## 화면 흐름
+1) **클래스 선택**: 좌측 드롭다운에서 클래스별로 에이전트 목록을 필터링한다.
+2) **에이전트 목록**: 카드에 배지로 상태(활성/종료)와 최근 수정일이 표시된다. 핀/프로젝트 배지로 주요 항목을 고정할 수 있다.
+3) **생성/편집**: "새 에이전트" 버튼으로 system prompt, few-shot, 기본 파라미터(스타일/temperature 등)를 입력한다.
+4) **버전 관리**: 업데이트 시 새 버전으로 저장해 클래스 배포 전 테스트할 수 있다.
+5) **공유/포크**: 클래스에 배포하거나, 학생·강사가 개인화할 수 있도록 포크를 허용한다.
+
+## 권장 구성
+- **system prompt**: 역할/목표/금지/출력 형식을 명시. 규칙은 우선순위(필수 → 선택)로 정렬.
+- **few-shot 예시**: 1~3개, 짧은 형식 중심. 비용·latency를 고려해 길이를 최소화.
+- **기본 옵션**: 스타일 프리셋, temperature/top_p, max_tokens를 기본값으로 저장해 세션마다 반복 설정을 줄인다.
 
 ## 비용/지연에 영향 주는 지점
-- system prompt 길이
-- few-shot 예시 길이
-- 세션에서 RAG/도구를 함께 켜면 prompt가 더 커짐
+- system prompt 길이 + few-shot 토큰 → baseline 대비 prompt 토큰 증가폭을 Practice에서 기록.
+- RAG/도구를 함께 켤 때 컨텍스트가 늘어나므로 top_k, max_chunks를 보수적으로 시작한다.
 
-## 자주 터지는 실수
-- 규칙이 너무 많아 충돌(모델이 제멋대로 우선순위 해석)
-- 금지/허용 기준이 모호함
-- 내용 위주의 few-shot(비싸고 과적합)
-
-## 라이프사이클(추천)
-1) agent 생성(system prompt 작성)
-2) Practice에서 질문 세트로 테스트
-3) 필요하면 few-shot 1~3개 추가
-4) 클래스에 공유(Partner)
-5) 학생은 포크해서 개인화
-
-## system prompt 권장 구조
-- 역할(Role)
-- 목표(Goal)
-- 제약(Do/Don't)
-- 출력 형식(Output format: 매우 구체적으로)
+## 라이프사이클 체크리스트
+1) 생성: system prompt 초안 작성 → few-shot 추가(필요 시).
+2) 테스트: /practice/agents 절차로 baseline과 비교.
+3) 배포: 클래스에 공유하고, 필요한 경우 사용 제한(편집 권한/포크 허용 여부)을 설정.
+4) 운영: 품질/비용 로그를 보고 system prompt와 few-shot을 주기적으로 다듬는다.
 
 ## 다음 문서
-- /agents/system-prompt
-- /agents/sharing
-- /agents/forking
-
+- /agents/system-prompt (프롬프트 구조)
+- /agents/sharing (클래스 배포)
+- /agents/forking (개인화 흐름)

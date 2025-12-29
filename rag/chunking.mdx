@@ -1,48 +1,35 @@
-﻿---
-title: "청킹(Chunking)"
-description: "chunk_size/overlap 전략과 트레이드오프"
 ---
+title: "청킹(Chunking)"
+description: "chunk_size/overlap을 언제 어떻게 조정할지"
+---
+
 ## 이 문서에서 하는 것
-- 검색(Retrieval) 설정을 바꾸면서 품질/지연/비용이 어떻게 달라지는지 확인해.
+- 고급 설정과 RAG 비교 카드에서 청킹 관련 값을 어떻게 넣고, 결과를 어떻게 읽을지 안내해.
 
-## RAG 파이프라인(큰 흐름)
-1) 인제스천: 업로드 → 파싱 → 청킹
-2) 임베딩: 청크 → 벡터
-3) 검색: 질의 → 벡터검색 → 후보(top-k)
-4) (선택) 재랭킹: 후보 재정렬
-5) 생성: 답변 + 출처
+## 입력 위치
+- **고급 설정 모드**: chunk_size, chunk_overlap, max_chunks를 직접 입력해 기본값을 정의.
+- **RAG 비교 카드**: 청킹 값은 공유되며, 검색/재랭크 파라미터만 좌·우로 다르게 줄 수 있다. 청킹을 바꿀 땐 업로드를 다시 돌린다.
 
-## 핵심 변수
-- chunk_size / chunk_overlap / max_chunks
-- embedding 모델(및 dimension)
-- top_k / threshold(유사도 임계값)
-- rerank on/off
+## 기본 가이드
+- **chunk_size**: 400~800 토큰으로 시작. 짧은 FAQ/QA는 300대, 설명서·교재는 800대까지 확장.
+- **chunk_overlap**: 50~150 토큰으로 맥락 연결. 문단 구조가 잘 잡힌 문서는 overlap을 줄여 토큰 낭비를 막는다.
+- **max_chunks**: 긴 문서를 다룰 때 컨텍스트 길이 폭주를 방지하는 안전장치로 설정.
 
-## 기록할 지표
-- retrieved_count / score 분포
-- 답변 근거성(정말 관련 청크를 가져왔나?)
-- 지연/토큰/비용(컨텍스트가 길어지면 prompt가 커짐)
+## 문서 유형별 팁
+- **PDF 슬라이드/교안**: 슬라이드마다 문단이 짧으니 chunk_size를 키우고 overlap을 최소화.
+- **FAQ/공지**: Q-A 단위로 의미가 끊기면 chunk_size를 작게, overlap 50 이하로 설정.
+- **코드/표 포함 문서**: 파싱 후 프리뷰에서 깨진 구간이 있으면 chunk_size를 줄여 재업로드.
 
-## 자주 터지는 실수
-- top-k 과다(노이즈/비용/지연 증가)
-- threshold 과다(필요한 청크를 못 가져옴)
-- overlap 과다(중복 컨텍스트로 토큰 낭비)
+## 테스트 방법
+1) 기본값으로 업로드 후, 프리뷰에서 섹션 경계가 자연스러운지 확인.
+2) RAG 비교 카드에서 같은 검색 파라미터로 질문을 던지고, 근거 청크 길이/개수를 비교.
+3) 토큰/latency가 높으면 chunk_size를 줄이거나 max_chunks를 지정해 재인덱싱.
 
-## 청킹 전략
-- recursive(문단/구조 기반) 권장
-- fixed-size는 구현은 쉽지만 의미 단위가 깨질 수 있음
-
-## 트레이드오프
-- 작은 청크: 정밀도↑ / 문맥연결↓
-- 큰 청크: 문맥연결↑ / 정밀도↓ + 토큰비용↑
-- overlap: 문맥연결↑ / 중복비용↑
-
-## 추천 실험
-1) chunk_size 300 vs 800
-2) overlap 0 vs 100
-3) max_chunks 상한으로 폭주 방지
+## 실패 패턴 & 대응
+- **중복 청크**: overlap 과다 → overlap을 절반으로 줄여 재업로드.
+- **누락된 컨텍스트**: chunk_size가 너무 작아 문맥이 끊김 → chunk_size/overlap을 함께 늘린다.
+- **파싱 오류**: 프리뷰에서 깨진다면 파일을 재저장하거나 페이지 범위를 잘라서 다시 올린다.
 
 ## 다음 문서
-- /rag/search
-- /rag/threshold-topk
-
+- /rag/search (검색 파라미터)
+- /rag/threshold-topk (검색 필터링)
